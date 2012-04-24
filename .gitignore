@@ -1,0 +1,4 @@
+# Ignore all target directories.
+target/
+# Ignore vi .swp files
+*.swp
