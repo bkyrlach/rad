@@ -136,7 +136,7 @@
         <argument>--nobackup</argument>
         <argument>-r</argument>
         <argument>-q</argument>
-        <argument>--log=/home/jozias/jalopy.log</argument>
+        <argument>--log=./jalopy.log</argument>
         <argument>.</argument>
        </arguments>
       </configuration>
