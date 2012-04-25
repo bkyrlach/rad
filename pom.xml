@@ -1065,7 +1065,7 @@
   <site>
    <id>oziasnet</id>
    <name>oziasnet</name>
-   <url>scpexe://ozias.net/home/oziasnet/public_html/oziasnet/dev</url>
+   <url>scpexe://ozias.net/home/oziasnet/public_html/oziasnet/sandbox</url>
   </site>
  </distributionManagement>
  <organization>
