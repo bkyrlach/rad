@@ -9,7 +9,7 @@
  <parent>
   <groupId>oziasnet</groupId>
   <artifactId>rad-super-pom</artifactId>
-  <version>1.0-BETA-SNAPSHOT</version>
+  <version>1.0-SNAPSHOT</version>
  </parent>
 
  <build>
