@@ -2,3 +2,5 @@
 target/
 # Ignore vi .swp files
 *.swp
+# Ignore .log files
+*.log
