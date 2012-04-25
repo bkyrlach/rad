@@ -3,12 +3,12 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>oziasnet</groupId>
  <artifactId>rad-super-pom</artifactId>
- <version>1.0-SB-SNAPSHOT</version>
- <name>Oziasnet R@d Super POM (Sandbox)</name>
+ <version>1.0-BETA-SNAPSHOT</version>
+ <name>Oziasnet R@d Super POM (Beta)</name>
  <description>This project composes all of the R@d software into comprehensive packages for deployment.</description>
  <inceptionYear>2012</inceptionYear>
  <packaging>pom</packaging>
- <url>http://www.ozias.net/rad/sandbox</url>
+ <url>http://www.ozias.net/rad/beta</url>
  <scm>
   <connection>scm:git:git://github.com/CraZySacX/rad.git</connection>
   <developerConnection>scm:git:git@github.com:CraZySacX/rad.git</developerConnection>
@@ -20,7 +20,7 @@
   <!-- Maven Property Adjustments -->
   <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
   <!-- Build Environment -->
-  <environment>SB</environment>
+  <environment>BETA</environment>
   <!-- Java Source Version -->
   <compileSource>1.7</compileSource>
   <!-- Common Encoding Format -->
@@ -1065,7 +1065,7 @@
   <site>
    <id>oziasnet</id>
    <name>oziasnet</name>
-   <url>scpexe://ozias.net/home/oziasnet/public_html/oziasnet/dev</url>
+   <url>scpexe://ozias.net/home/oziasnet/public_html/oziasnet/beta</url>
   </site>
  </distributionManagement>
  <organization>
