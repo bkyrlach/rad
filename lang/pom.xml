@@ -86,4 +86,163 @@
    <artifactId>commons-lang3</artifactId>
   </dependency>
  </dependencies>
+ 
+ <profiles>
+  <profile>
+   <id>format</id>
+   <activation>
+    <property>
+     <name>format</name>
+    </property>
+   </activation>
+   <build>
+    <plugins>
+     <!-- Triemax Jalopy Plugin -->
+     <plugin>
+      <groupId>triemax</groupId>
+      <artifactId>jalopy-maven</artifactId>
+      <configuration>
+      <excludes>
+       <exclude>**/generated-sources/**/*</exclude>
+      </excludes>
+      </configuration>
+      <executions>
+       <execution>
+        <id>jalopy-format</id>
+        <phase>process-sources</phase>
+        <goals>
+         <goal>format</goal>
+        </goals>
+       </execution>
+      </executions>
+     </plugin>
+     <!-- Codehaus Exec Plugin -->
+     <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>exec-maven-plugin</artifactId>
+      <executions>
+       <execution>
+        <id>jalopy-test-format</id>
+        <phase>process-test-sources</phase>
+        <goals>
+         <goal>exec</goal>
+        </goals>
+       </execution>
+      </executions>
+      <configuration>
+       <executable>/opt/jalopy/bin/jalopy.sh</executable>
+       <workingDirectory>${basedir}/src/test/java</workingDirectory>
+       <arguments>
+        <argument>--nobackup</argument>
+        <argument>-r</argument>
+        <argument>-q</argument>
+        <argument>--log=/home/jozias/jalopy.log</argument>
+        <argument>.</argument>
+       </arguments>
+      </configuration>
+     </plugin>
+    </plugins>
+   </build>
+  </profile>
+  <profile>
+   <id>pmd</id>
+   <activation>
+    <property>
+     <name>!pmd</name>
+    </property>
+   </activation>
+   <build>
+    <plugins>
+     <!-- Dependency Plugin (Used here to generate a classpath.properties file) -->
+     <!--
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-dependency-plugin</artifactId>
+      <executions>
+       <execution>
+        <id>build-classpath</id>
+        <goals>
+         <goal>build-classpath</goal>
+        </goals>
+        <phase>initialize</phase>
+        <configuration>
+         <outputFile>${project.build.directory}/classpath.properties</outputFile>
+         <outputFilterFile>true</outputFilterFile>
+         <includeScope>test</includeScope> -->
+         <!-- <pathSeparator>;</pathSeparator> -->
+        <!-- </configuration>
+       </execution>
+      </executions>
+     </plugin> -->
+     <!-- Properties Plugin (Used here to read a classpath.properties file into a property) -->
+     <!--<plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>properties-maven-plugin</artifactId>
+      <executions>
+       <execution>
+        <id>read-project-properties</id>
+        <goals>
+         <goal>read-project-properties</goal>
+        </goals>
+        <phase>initialize</phase>
+        <configuration>
+         <files>
+          <file>${project.build.directory}/classpath.properties</file>
+         </files>
+        </configuration>
+       </execution>
+      </executions>
+     </plugin> -->
+     <!-- Maven PMD Plugin -->
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-pmd-plugin</artifactId>
+      <configuration>
+       <excludeRoots>
+        <excludeRoot>${project.build.directory}/generated-sources/jjtree</excludeRoot>
+        <excludeRoot>${project.build.directory}/generated-sources/javacc</excludeRoot>
+       </excludeRoots>
+      </configuration>
+      <executions>
+       <execution>
+        <id>pmd-verify</id>
+        <phase>verify</phase>
+        <goals>
+         <goal>check</goal>
+         <goal>cpd-check</goal>
+        </goals>
+       </execution>
+      </executions>
+     </plugin>
+    </plugins>
+   </build>
+  </profile>
+  <profile>
+   <id>checkstyle</id>
+   <activation>
+    <property>
+     <name>!checkstyle</name>
+    </property>
+   </activation>
+   <build>
+    <plugins>
+     <!-- Maven Checkstyle Plugin -->
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-checkstyle-plugin</artifactId>
+      <executions>
+       <execution>
+        <id>checkstyle-verify</id>
+        <phase>verify</phase>
+        <goals>
+         <goal>checkstyle</goal>
+         <goal>check</goal>
+        </goals>
+       </execution>
+      </executions>
+     </plugin>
+    </plugins>
+   </build>
+  </profile>
+ </profiles>
 </project>
