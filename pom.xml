@@ -347,11 +347,9 @@
       <systemPropertyVariables>
        <log4j.configuration>file:target/test-classes/test-log4j.xml</log4j.configuration>
       </systemPropertyVariables>
-      <!--
       <suiteXmlFiles>
        <suiteXmlFile>${project.build.directory}/test-classes/testng.xml</suiteXmlFile>
       </suiteXmlFiles>
-      -->
      </configuration>
     </plugin>
     <!-- Maven War Plugin -->
@@ -400,6 +398,9 @@
      <groupId>org.codehaus.mojo</groupId>
      <artifactId>javacc-maven-plugin</artifactId>
      <version>${javacc-maven-plugin.version}</version>
+     <configuration>
+      <grammarEncoding>${encoding}</grammarEncoding>
+     </configuration>
     </plugin>
     <!-- Java.net JAX-WS Plugin -->
     <plugin>

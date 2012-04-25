@@ -7,15 +7,16 @@ PARSER_BEGIN(Parser)
 
 package net.ozias.rad.lang;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.File;
 
 public class Parser {
 
-  public static void main(final String ... args) throws ParseException, TokenMgrError {    final Parser parser = new Parser( System.in );
+  public static SimpleNode parseFile( final File file ) throws FileNotFoundException, ParseException, TokenMgrError {    final Parser parser = new Parser( new FileReader( file ) );
     parser.rad();
-    SimpleNode root = ( SimpleNode ) parser.jjtree.rootNode();
-        ((ASTrad)root).dump("--> ");  }
+    return ( SimpleNode ) parser.jjtree.rootNode();
+  }
 }
 
 PARSER_END(Parser)
@@ -140,7 +141,7 @@ void Use() : {}
 
 void Block() : {}
 {
-    (      < ID > ["is" < ID > ] "{"
+    (      < ID > ["is" < ID >("," < ID > )*] "{"
       [Has() ";"]
       (Actions() ";")?
       (Data() ";")?

@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+<suite name="rad-lang-test-suite">
+ <test verbose="1" name="rad-lang-tests">
+  <packages>
+   <package name="net.ozias.rad.lang" />
+  </packages>
+ </test>
+</suite>
