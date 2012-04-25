@@ -1,5 +1,9 @@
+/**
+ * Copyright (c) 2011 EyeMed Vision Care. All Rights Reserved.
+ */
 package net.ozias.rad.lang;
 
-public class TestParser {
-
-}
+/**
+ * TODO: DOCUMENT ME!
+ */
+public class TestParser { }
