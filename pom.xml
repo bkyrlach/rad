@@ -3,12 +3,12 @@
  <modelVersion>4.0.0</modelVersion>
  <groupId>oziasnet</groupId>
  <artifactId>rad-super-pom</artifactId>
- <version>1.0-DEV-SNAPSHOT</version>
- <name>Oziasnet R@d Super POM (DEV)</name>
+ <version>1.0-SB-SNAPSHOT</version>
+ <name>Oziasnet R@d Super POM (Sandbox)</name>
  <description>This project composes all of the R@d software into comprehensive packages for deployment.</description>
  <inceptionYear>2012</inceptionYear>
  <packaging>pom</packaging>
- <url>http://www.ozias.net/rad/dev</url>
+ <url>http://www.ozias.net/rad/sandbox</url>
  <scm>
   <connection>scm:git:git://github.com/CraZySacX/rad.git</connection>
   <developerConnection>scm:git:git@github.com:CraZySacX/rad.git</developerConnection>
@@ -20,7 +20,7 @@
   <!-- Maven Property Adjustments -->
   <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
   <!-- Build Environment -->
-  <environment>DEV</environment>
+  <environment>SB</environment>
   <!-- Java Source Version -->
   <compileSource>1.7</compileSource>
   <!-- Common Encoding Format -->
@@ -567,7 +567,6 @@
           </execute>
          </action>
         </pluginExecution>
-
        </pluginExecutions>
       </lifecycleMappingMetadata>
      </configuration>
@@ -951,20 +950,42 @@
  </dependencyManagement>
  <profiles>
   <profile>
-   <id>dev</id>
+   <id>sandbox</id>
    <activation>
     <property>
      <name>env</name>
-     <value>dev</value>
+     <value>sandbox</value>
     </property>
    </activation>
   </profile>
   <profile>
-   <id>prod</id>
+   <id>beta</id>
    <activation>
     <property>
      <name>env</name>
-     <value>prod</value>
+     <value>beta</value>
+    </property>
+   </activation>
+   <build>
+    <plugins>
+     <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>${maven-compiler-plugin.version}</version>
+      <configuration>
+       <debug>false</debug>
+       <optimize>true</optimize>
+      </configuration>
+     </plugin>
+    </plugins>
+   </build>
+  </profile>
+  <profile>
+   <id>master</id>
+   <activation>
+    <property>
+     <name>env</name>
+     <value>master</value>
     </property>
    </activation>
    <build>
