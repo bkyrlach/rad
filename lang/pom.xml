@@ -92,7 +92,7 @@
    <id>format</id>
    <activation>
     <property>
-     <name>!noformat</name>
+     <name>format</name>
     </property>
    </activation>
    <build>
@@ -148,7 +148,7 @@
    <id>pmd</id>
    <activation>
     <property>
-     <name>pmd</name>
+     <name>!pmd</name>
     </property>
    </activation>
    <build>
@@ -221,7 +221,7 @@
    <id>checkstyle</id>
    <activation>
     <property>
-     <name>checkstyle</name>
+     <name>!checkstyle</name>
     </property>
    </activation>
    <build>
