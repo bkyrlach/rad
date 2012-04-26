@@ -1,6 +1,7 @@
 options {
     UNICODE_INPUT = true;
     MULTI = true;
+    STATIC = false;
 }
 
 PARSER_BEGIN(Parser)
@@ -10,9 +11,16 @@ package net.ozias.rad.lang;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.File;
+import java.io.InputStream;
 
 public class Parser {
 
+  public static SimpleNode parseFile( final InputStream stream ) throws FileNotFoundException, ParseException, TokenMgrError {
+    final Parser parser = new Parser( stream );
+    parser.rad();
+    return ( SimpleNode ) parser.jjtree.rootNode();
+  }
+  
   public static SimpleNode parseFile( final File file ) throws FileNotFoundException, ParseException, TokenMgrError {    final Parser parser = new Parser( new FileReader( file ) );
     parser.rad();
     return ( SimpleNode ) parser.jjtree.rootNode();
@@ -26,16 +34,21 @@ SKIP : {
   " " |  "\n" | "\r" | "\r\n" | <"//" (~["\n","\r"])* ("\n"|"\r")>
 }
 
-// Literals
-TOKEN : { < INTLIT: (["0"-"9"])+ > }
-
 // Reserved Words
 TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is"
 }
 
+// Numbers
+TOKEN : {
+  < NUMBER: <INTEGER> | <DECIMAL> >
+| < INTEGER: < DIGIT > (< DIGIT >)* >
+| < DECIMAL: (< DIGIT >)+ "." (< DIGIT >)* > 
+| < #DIGIT: ["0"-"9"] >
+}
+
 // Identifiers
 TOKEN: {
-  < ID: < LETTER > ( < LETTER >|< DIGIT >|"_")* >
+  < ID: < LETTER > ( < LETTER >|< IDDIGIT >|"_")* >
 |
   < #LETTER: [
     "\u0041"-"\u005a", "\u0061"-"\u007a", "\u00aa"-"\u00aa", "\u00b5"-"\u00b5", "\u00ba"-"\u00ba",
@@ -96,7 +109,7 @@ TOKEN: {
     "\uffda"-"\uffdc"
   ] >
 |
-  < #DIGIT: [
+  < #IDDIGIT: [
     "\u0030"-"\u0039", "\u0660"-"\u0669", "\u06f0"-"\u06f9", "\u0966"-"\u096f", "\u09e6"-"\u09ef",
     "\u0a66"-"\u0a6f", "\u0ae6"-"\u0aef", "\u0b66"-"\u0b6f", "\u0be7"-"\u0bef", "\u0c66"-"\u0c6f",
     "\u0ce6"-"\u0cef", "\u0d66"-"\u0d6f", "\u0e50"-"\u0e59", "\u0ed0"-"\u0ed9", "\u0f20"-"\u0f29",
@@ -123,28 +136,30 @@ void rad() : {}
 {
     [Namespace() ";"]
     [(Use() ";" )+]
-    (Block() ";" )*
+    (Block() ";" )+
     <EOF>
 }
 
-void Namespace() : {}
+void Namespace() :
+{ Token t; }
 {
-  (    "ns" < NAMESPACE >
+  (    "ns" t=< NAMESPACE > { jjtThis.jjtSetValue( t.image ); }
   |
-    "namespace" < NAMESPACE >
+    "namespace" t=< NAMESPACE > { jjtThis.jjtSetValue( t.image ); }
   )
 }
 
-void Use() : {}
-{    "use" < USE >
+void Use() :
+{ Token t; }
+{    "use" t=< USE > { jjtThis.jjtSetValue( t.image ); }
 }  
 
 void Block() : {}
 {
-    (      < ID > ["is" < ID >("," < ID > )*] "{"
+    (      Id() ["is" Id()("," Id() )*] "{"
       [Has() ";"]
-      (Actions() ";")?
-      (Data() ";")?
+      [Actions() ";"]
+      [Data() ";"]
       "}"
     )
 }
@@ -161,3 +176,20 @@ void Actions() : {}
 void Data() : {}
 {
   "data" "{" "}"}
+
+void Id() #Id :
+{ Token t; }
+{
+  t=< ID >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Number() #Number :
+{ Token t; }
+{
+  (
+    t=< INTEGER > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }
+  |
+    t=< DECIMAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
+  ) 
+}

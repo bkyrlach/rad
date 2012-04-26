@@ -85,6 +85,11 @@
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-lang3</artifactId>
   </dependency>
+  <dependency>
+   <groupId>oziasnet</groupId>
+   <artifactId>common-utilities</artifactId>
+   <version>1.0-DEV-SNAPSHOT</version>
+  </dependency>
  </dependencies>
  
  <profiles>
@@ -135,8 +140,6 @@
        <arguments>
         <argument>--nobackup</argument>
         <argument>-r</argument>
-        <argument>-q</argument>
-        <argument>--log=./jalopy.log</argument>
         <argument>.</argument>
        </arguments>
       </configuration>

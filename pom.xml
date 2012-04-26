@@ -134,7 +134,7 @@
      <artifactId>jalopy-maven</artifactId>
      <version>${jalopy.version}</version>
      <configuration>
-      <convention>http://www.ozias.net/em_jalopy_config.xml</convention>
+      <convention>http://www.ozias.net/jalopy_config.xml</convention>
       <failOnError>false</failOnError>
       <fork>true</fork>
       <encoding>${encoding}</encoding>
