@@ -7,7 +7,6 @@ import org.apache.log4j.Logger;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.ClassNode;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -31,16 +30,26 @@ public class Bootstrap implements Runnable {
   private static final ExecutorService EXECSERVICE;
   /** Futures list. */
   private static final Collection<Future<?>> FUTURES = new LinkedList<Future<?>>();
+  /** Name of the base class. */
+  private static final String BASE_CN = "net/ozias/rad/lang/Base";
+  /** Core ThreadPoolExecutor size. */
+  private static final int CORE_SIZE = 10;
+  /** Maximum ThreadPoolExecutor size. */
+  private static final int MAX_SIZE = 50;
+  /** Thread timeout (in seconds). */
+  private static final int TIMEOUT = 5;
+  /** Maximum ThreadPoolExecutor work queue size. */
+  private static final int QUEUE_SIZE = 20;
 
   static {
-    EXECSERVICE = new ThreadPoolExecutor( 10, 50, 5, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>( 20 ) );
+    EXECSERVICE = new ThreadPoolExecutor( CORE_SIZE, MAX_SIZE, TIMEOUT, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>( QUEUE_SIZE ) );
     ( ( ThreadPoolExecutor ) EXECSERVICE ).allowCoreThreadTimeOut( true );
   }
 
   //~ Instance fields ------------------------------------------------------------------------------------------------------------------------------------------
 
-  /** TODO: DOCUMENT ME! */
-  private RadClassLoader radClassLoader = new RadClassLoader();
+  /** The custom class loader for R@d. */
+  private final transient RadClassLoader radClassLoader = new RadClassLoader();
 
   //~ Methods --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +76,7 @@ public class Bootstrap implements Runnable {
    */
   @Override public void run() {
     generateBase();
-    addRunnable( new RadIntepreter() );
+    addRunnable( new RadInterpreter() );
 
     for ( final Future<?> future : FUTURES ) {
 
@@ -82,16 +91,13 @@ public class Bootstrap implements Runnable {
   }
 
   /**
-   * TODO: DOCUMENT ME!
+   * Generate the base class shell with ASM. Load it into the JVM.
    */
   private void generateBase() {
-    final ClassNode cn = new ClassNode();
-    cn.version = Opcodes.V1_7;
-    cn.name = "net/ozias/rad/lang/Base";
-    cn.superName = "java/lang/Object";
-    final ClassWriter cw = new ClassWriter( ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES );
-    cn.accept( cw );
+    final ClassWriter cw = new ClassWriter( 0 );
+    cw.visit( Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, BASE_CN, null, "java/lang/Object", null );
+    cw.visitEnd();
     final byte[] bytecode = cw.toByteArray();
-    radClassLoader.loadClass( cn.name.replace( '/', '.' ), bytecode );
+    radClassLoader.loadClass( BASE_CN.replace( '/', '.' ), bytecode );
   }
 }

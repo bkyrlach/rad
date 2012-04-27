@@ -11,14 +11,14 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 /**
- * R@d Command Intepreter.
+ * R@d Command Interpreter.
  */
-public class RadIntepreter implements Runnable {
+public class RadInterpreter implements Runnable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** log4j Logger. */
-  private static final Logger LOG = Logger.getLogger( RadIntepreter.class );
+  private static final Logger LOG = Logger.getLogger( RadInterpreter.class );
 
   //~ Methods --------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -28,7 +28,9 @@ public class RadIntepreter implements Runnable {
   @Override public void run() {
     final Console con = System.console();
 
-    if ( con != null ) {
+    if ( con == null ) {
+      LOG.error( "Unable to access system console." );
+    } else {
       final PrintWriter writer = con.writer();
       final RadPrompt prompt = new RadPrompt( con.writer() );
       final Scanner scanner = new Scanner( con.reader() );
@@ -49,34 +51,32 @@ public class RadIntepreter implements Runnable {
           prompt.print();
         }
       }
-    } else {
-      LOG.error( "Unable to access system console." );
     }
   }
 
   //~ Inner Classes --------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * TODO: DOCUMENT ME!
+   * Generate the Rad prompt.
    */
   private class RadPrompt {
 
     //~ Static fields/initializers -----------------------------------------------------------------------------------------------------------------------------
 
-    /** TODO: DOCUMENT ME! */
-    private static final String prompt = "r@d: ";
+    /** The prompt value. */
+    private static final String PROMPT = "r@d: ";
 
     //~ Instance fields ----------------------------------------------------------------------------------------------------------------------------------------
 
-    /** TODO: DOCUMENT ME! */
-    private PrintWriter writer;
+    /** The writer associated with the console. */
+    private final transient PrintWriter writer;
 
     //~ Constructors -------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * TODO: Creates a new RadPrompt object.
+     * Creates a new RadPrompt object.
      *
-     * @param  writer  TODO: DOCUMENT ME!
+     * @param  writer  The writer associated with the console.
      */
     public RadPrompt( final PrintWriter writer ) {
       this.writer = writer;
@@ -85,10 +85,10 @@ public class RadIntepreter implements Runnable {
     //~ Methods ------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * TODO: DOCUMENT ME!
+     * Spit out the prompt.
      */
     public void print() {
-      writer.print( prompt );
+      writer.print( PROMPT );
       writer.flush();
     }
   }

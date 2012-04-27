@@ -217,6 +217,9 @@
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-pmd-plugin</artifactId>
       <configuration>
+      <rulesets>
+       <ruleset>http://www.ozias.net/non_j2ee_pmd_ruleset.xml</ruleset>
+      </rulesets>
        <excludeRoots>
         <excludeRoot>${project.build.directory}/generated-sources/jjtree</excludeRoot>
         <excludeRoot>${project.build.directory}/generated-sources/javacc</excludeRoot>
