@@ -286,6 +286,7 @@
         <configuration>
          <aggregate>true</aggregate>
          <linkXRef>false</linkXRef>
+         <forkMode>never</forkMode>
         </configuration>
        </plugin>
       </reportPlugins>

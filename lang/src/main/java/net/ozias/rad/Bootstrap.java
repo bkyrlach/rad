@@ -92,6 +92,6 @@ public class Bootstrap implements Runnable {
     final ClassWriter cw = new ClassWriter( ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES );
     cn.accept( cw );
     final byte[] bytecode = cw.toByteArray();
-    radClassLoader.loadClass( cn.name.replace('/', '.'), bytecode );
+    radClassLoader.loadClass( cn.name.replace( '/', '.' ), bytecode );
   }
 }
