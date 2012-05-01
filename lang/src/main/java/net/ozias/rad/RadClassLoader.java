@@ -38,8 +38,8 @@ public class RadClassLoader extends ClassLoader {
     final Class<?> retclass;
 
     if ( "Op".equals( name ) ) {
-      final byte[] bytecode = ASMOp.generateOpsOpEnum();
-      retclass = defineClass( name, bytecode, 0, bytecode.length );
+      final byte[] opbytecode = ASMOp.generateOpEnum();
+      retclass = defineClass( name, opbytecode, 0, opbytecode.length );
     } else if ( ( bytecode != null ) && ( bytecode.length > 0 ) ) {
       retclass = defineClass( name, bytecode, 0, bytecode.length );
       bytecode = null;

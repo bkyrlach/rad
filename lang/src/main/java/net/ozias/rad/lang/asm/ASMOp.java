@@ -3,6 +3,12 @@
  */
 package net.ozias.rad.lang.asm;
 
+import static net.ozias.rad.lang.asm.ASMConstants.LOC0;
+import static net.ozias.rad.lang.asm.ASMConstants.LOC1;
+import static net.ozias.rad.lang.asm.ASMConstants.LOC2;
+import static net.ozias.rad.lang.asm.ASMConstants.LOC3;
+import static net.ozias.rad.lang.asm.ASMConstants.LOC4;
+
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -57,7 +63,7 @@ public final class ASMOp implements Opcodes {
    *
    * @return  The ASMOp enum bytecode array.
    */
-  public static byte[] generateOpsOpEnum() {
+  public static byte[] generateOpEnum() {
     final ClassWriter cw = new ClassWriter( 0 );
 
     cw.visit( V1_7, ACC_PUBLIC + ACC_FINAL + ACC_SUPER + ACC_ENUM, OP, "Ljava/lang/Enum<LOp;>;", "java/lang/Enum", null );
@@ -139,7 +145,7 @@ public final class ASMOp implements Opcodes {
     mv.visitInsn( AASTORE );
     mv.visitFieldInsn( PUTSTATIC, OP, "$VALUES", OP_OBJ_ARR );
     mv.visitInsn( RETURN );
-    mv.visitMaxs( 4, 0 );
+    mv.visitMaxs( LOC4, LOC0 );
     mv.visitEnd();
   }
 
@@ -161,12 +167,12 @@ public final class ASMOp implements Opcodes {
   private static void visitInitMethod( final ClassWriter cw ) {
     final MethodVisitor mv = cw.visitMethod( ACC_PRIVATE, INIT, INIT_SIG, "()V", null );
     mv.visitCode();
-    mv.visitVarInsn( ALOAD, 0 );
-    mv.visitVarInsn( ALOAD, 1 );
-    mv.visitVarInsn( ILOAD, 2 );
+    mv.visitVarInsn( ALOAD, LOC0 );
+    mv.visitVarInsn( ALOAD, LOC1 );
+    mv.visitVarInsn( ILOAD, LOC2 );
     mv.visitMethodInsn( INVOKESPECIAL, "java/lang/Enum", INIT, INIT_SIG );
     mv.visitInsn( RETURN );
-    mv.visitMaxs( 3, 3 );
+    mv.visitMaxs( LOC3, LOC3 );
     mv.visitEnd();
   }
 
@@ -199,11 +205,11 @@ public final class ASMOp implements Opcodes {
     final MethodVisitor mv = cw.visitMethod( ACC_PUBLIC + ACC_STATIC, "valueOf", "(Ljava/lang/String;)LOp;", null, null );
     mv.visitCode();
     mv.visitLdcInsn( Type.getType( OP_OBJ ) );
-    mv.visitVarInsn( ALOAD, 0 );
+    mv.visitVarInsn( ALOAD, LOC0 );
     mv.visitMethodInsn( INVOKESTATIC, "java/lang/Enum", "valueOf", "(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;" );
     mv.visitTypeInsn( CHECKCAST, OP );
     mv.visitInsn( ARETURN );
-    mv.visitMaxs( 2, 1 );
+    mv.visitMaxs( LOC2, LOC1 );
     mv.visitEnd();
   }
 
@@ -229,7 +235,7 @@ public final class ASMOp implements Opcodes {
     mv.visitMethodInsn( INVOKEVIRTUAL, OP_OBJ_ARR, "clone", "()Ljava/lang/Object;" );
     mv.visitTypeInsn( CHECKCAST, OP_OBJ_ARR );
     mv.visitInsn( ARETURN );
-    mv.visitMaxs( 1, 0 );
+    mv.visitMaxs( LOC1, LOC0 );
     mv.visitEnd();
   }
 }

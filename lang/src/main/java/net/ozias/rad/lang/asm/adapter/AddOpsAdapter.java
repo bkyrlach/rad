@@ -16,19 +16,6 @@ public class AddOpsAdapter extends ClassVisitor implements Opcodes {
 
   //~ Instance fields ------------------------------------------------------------------------------------------------------------------------------------------
 
-// /** Local Variable 0. */
-// private static final int LOC0 = 0;
-// /** Local Variable 1. */
-// private static final int LOC1 = 1;
-// /** Local Variable 2. */
-// private static final int LOC2 = 2;
-// /** Local Variable 3. */
-// private static final int LOC3 = 3;
-// /** Local Variable 4. */
-// private static final int LOC4 = 4;
-// /** Local Variable 5. */
-// private static final int LOC5 = 5;
-
   /** Is the add method already present. */
   private transient boolean isMethodPresent = false;
 

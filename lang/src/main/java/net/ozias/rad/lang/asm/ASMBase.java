@@ -10,7 +10,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 /**
- * TODO: DOCUMENT ME!
+ * Generate the ASM for the base R@d object.
  */
 public final class ASMBase {
 
