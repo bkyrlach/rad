@@ -30,11 +30,11 @@ public class Parser {
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
 
-  public static SimpleNode parseExpression( final String string ) {    final Parser parser = new Parser( new ByteArrayInputStream( string.getBytes() ) );
+  public static SimpleNode parseStatement( final String string ) {    final Parser parser = new Parser( new ByteArrayInputStream( string.getBytes() ) );
     SimpleNode retnode = null;
     
     try {
-      parser.Expression();
+      parser.Statement();
       retnode = ( SimpleNode ) parser.jjtree.rootNode();
     } catch ( ParseException e ) {
       LOG.error( e.getMessage(), e );
@@ -201,6 +201,29 @@ void Data() : {}
 {
   "data" "{" "}"}
 
+void Statement() :
+{}
+{
+  Assignment() | Expression()}
+
+void Assignment() :
+{ Token t; }
+{
+  t=< ID > "=" Expression() ";"
+  { jjtThis.jjtSetValue( t.image ); }}
+
+void Expression() :
+{}
+{
+  Term() ( Plus() Term() | Minus() Term() )*
+}
+
+void Term() :
+{}
+{
+  Primary() ( Mult() Primary() | Div() Primary() | Mod() Primary() )*
+}
+
 void Primary() :
 {}
 {
@@ -208,14 +231,22 @@ void Primary() :
     Number()
   | OpFunction()
   | < OPEN_PAR > Expression() < CLOSE_PAR >
-  | NegativePrimary()  )}
+  | NegativePrimary()
+  )
+}
 
-void NegativePrimary()  :
-{}
+void Number() #Number :
+{ Token t; }
 {
-  < MINUS > Primary()}
+  (
+    t=< INTEGER > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }
+  |
+    t=< DECIMAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
+  ) 
+}
 
-void OpFunction() :{ Token t; }
+void OpFunction() :
+{ Token t; }
 {
   (
   t="add" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
@@ -228,17 +259,13 @@ void OpFunction() :{ Token t; }
   |
   t="mod" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR > 
   )
-  { jjtThis.jjtSetValue( t.image ); }}
+  { jjtThis.jjtSetValue( t.image ); }
+}
 
-void Term() :
+void NegativePrimary()  :
 {}
 {
-  Primary() ( Mult() Primary() | Div() Primary() | Mod() Primary() )*}
-
-void Expression() :
-{}
-{
-  Term() ( Plus() Term() | Minus() Term() )*}
+  < MINUS > Primary()}
 
 void Plus() #Plus :
 { Token t; }
@@ -278,14 +305,4 @@ void Id() #Id :
 {
   t=< ID >
   { jjtThis.jjtSetValue( t.image ); }
-}
-
-void Number() #Number :
-{ Token t; }
-{
-  (
-    t=< INTEGER > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }
-  |
-    t=< DECIMAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
-  ) 
 }
