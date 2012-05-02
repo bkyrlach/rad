@@ -66,9 +66,7 @@ public final class ASMOps implements Opcodes {
    * @param  cv  The ClassVisitor to visit.
    */
   public static void generateOpsMethods( final ClassVisitor cv ) {
-    final MethodVisitor mv;
-
-    mv = cv.visitMethod( ACC_PUBLIC + ACC_STATIC, "evalOp", "(Ljava/lang/String;Ljava/util/List;)Ljava/lang/Number;",
+    final MethodVisitor mv = cv.visitMethod( ACC_PUBLIC + ACC_STATIC, "evalOp", "(Ljava/lang/String;Ljava/util/List;)Ljava/lang/Number;",
         "(Ljava/lang/String;Ljava/util/List<Ljava/lang/Number;>;)Ljava/lang/Number;", null );
     mv.visitCode();
     mv.visitInsn( ACONST_NULL );
@@ -83,7 +81,7 @@ public final class ASMOps implements Opcodes {
     mv.visitJumpInsn( GOTO, l0 );
     final Label l1 = new Label();
     mv.visitLabel( l1 );
-    mv.visitFrame( F_FULL, LOC6, new Object[] { "java/lang/String", JAVA_UTIL_LIST, JAVA_LANG_NUMBER, OP, TOP, JAVA_UTIL_ITERATOR }, 0, new Object[] {} );
+    mv.visitFrame( F_FULL, LOC6, new Object[] { "java/lang/String", JAVA_UTIL_LIST, JAVA_LANG_NUMBER, OP, TOP, JAVA_UTIL_ITERATOR }, LOC0, new Object[] {} );
     mv.visitVarInsn( ALOAD, LOC5 );
     mv.visitMethodInsn( INVOKEINTERFACE, JAVA_UTIL_ITERATOR, "next", "()Ljava/lang/Object;" );
     mv.visitTypeInsn( CHECKCAST, JAVA_LANG_NUMBER );
@@ -99,7 +97,7 @@ public final class ASMOps implements Opcodes {
     mv.visitVarInsn( ASTORE, LOC2 );
     mv.visitJumpInsn( GOTO, l0 );
     mv.visitLabel( l2 );
-    mv.visitFrame( F_FULL, LOC6, new Object[] { "java/lang/String", JAVA_UTIL_LIST, JAVA_LANG_NUMBER, OP, JAVA_LANG_NUMBER, JAVA_UTIL_ITERATOR }, 0,
+    mv.visitFrame( F_FULL, LOC6, new Object[] { "java/lang/String", JAVA_UTIL_LIST, JAVA_LANG_NUMBER, OP, JAVA_LANG_NUMBER, JAVA_UTIL_ITERATOR }, LOC0,
       new Object[] {} );
     mv.visitVarInsn( ALOAD, LOC3 );
     mv.visitFieldInsn( GETSTATIC, OP, "SUB", OP_METHOD );
@@ -128,10 +126,22 @@ public final class ASMOps implements Opcodes {
     mv.visitVarInsn( ALOAD, LOC3 );
     mv.visitFieldInsn( GETSTATIC, OP, "DIV", OP_METHOD );
     mv.visitMethodInsn( INVOKEVIRTUAL, OP, EQUALS, SIG );
-    mv.visitJumpInsn( IFEQ, l0 );
+    final Label l5 = new Label();
+    mv.visitJumpInsn( IFEQ, l5 );
     mv.visitVarInsn( ALOAD, LOC4 );
     mv.visitVarInsn( ALOAD, LOC2 );
     mv.visitMethodInsn( INVOKESTATIC, OBJ_NAME, "div", SIG_2 );
+    mv.visitVarInsn( ASTORE, LOC2 );
+    mv.visitJumpInsn( GOTO, l0 );
+    mv.visitLabel( l5 );
+    mv.visitFrame( F_SAME, LOC0, null, LOC0, null );
+    mv.visitVarInsn( ALOAD, LOC3 );
+    mv.visitFieldInsn( GETSTATIC, OP, "MOD", OP_METHOD );
+    mv.visitMethodInsn( INVOKEVIRTUAL, OP, EQUALS, SIG );
+    mv.visitJumpInsn( IFEQ, l0 );
+    mv.visitVarInsn( ALOAD, LOC4 );
+    mv.visitVarInsn( ALOAD, LOC2 );
+    mv.visitMethodInsn( INVOKESTATIC, OBJ_NAME, "mod", SIG_2 );
     mv.visitVarInsn( ASTORE, LOC2 );
     mv.visitLabel( l0 );
     mv.visitFrame( F_FULL, LOC6, new Object[] { "java/lang/String", JAVA_UTIL_LIST, JAVA_LANG_NUMBER, OP, TOP, JAVA_UTIL_ITERATOR }, LOC0, new Object[] {} );
@@ -149,6 +159,7 @@ public final class ASMOps implements Opcodes {
     ASMOpMethod.generateOp( cv, "sub" );
     ASMOpMethod.generateOp( cv, "mult" );
     ASMOpMethod.generateOp( cv, "div" );
+    ASMOpMethod.generateOp( cv, "mod" );
     visitConvertTotalMethod( cv );
   }
 

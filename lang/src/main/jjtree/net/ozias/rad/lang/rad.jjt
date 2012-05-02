@@ -47,7 +47,7 @@ SKIP : {
 }
 
 // Reserved Words
-TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is" | "add" | "sub" | "mul" | "div"
+TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is" | "add" | "sub" | "mul" | "div" | "mod"
 }
 
 TOKEN : { < OPEN_PAR : "(" > }
@@ -199,7 +199,7 @@ void Primary() :
   (
     Number()
   | OpFunction()
-  | < OPEN_PAR > Expression() < CLOSE_PAR >
+  | Expression()
   | NegativePrimary()  )}
 
 void NegativePrimary()  :
@@ -217,6 +217,8 @@ void OpFunction() :{ Token t; }
   t="mul" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
   |
   t="div" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
+  |
+  t="mod" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR > 
   )
   { jjtThis.jjtSetValue( t.image ); }}
 
@@ -229,7 +231,7 @@ void Term() :
 void Expression() :
 { Token t = null; }
 {
-  Term() ( t=< PLUS > Term() | t=< MINUS > Term() )*
+  < OPEN_PAR > Term() ( t=< PLUS > Term() | t=< MINUS > Term() )* < CLOSE_PAR >
   { jjtThis.jjtSetValue( t.image ); }}
 
 void Id() #Id :

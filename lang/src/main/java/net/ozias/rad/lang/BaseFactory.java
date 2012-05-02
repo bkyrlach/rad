@@ -4,6 +4,9 @@
 package net.ozias.rad.lang;
 
 import static net.ozias.rad.lang.BaseMethodFlags.ADD_METHOD;
+import static net.ozias.rad.lang.BaseMethodFlags.DIV_METHOD;
+import static net.ozias.rad.lang.BaseMethodFlags.MOD_METHOD;
+import static net.ozias.rad.lang.BaseMethodFlags.MUL_METHOD;
 import static net.ozias.rad.lang.BaseMethodFlags.SUB_METHOD;
 
 import net.ozias.rad.RadClassLoader;
@@ -109,7 +112,8 @@ public final class BaseFactory {
       ClassVisitor current = cw;
       final ClassReader cr = new ClassReader( currentByteCode );
 
-      if ( currentFlags.contains( ADD_METHOD ) || currentFlags.contains( SUB_METHOD ) ) {
+      if ( currentFlags.contains( ADD_METHOD ) || currentFlags.contains( DIV_METHOD ) || currentFlags.contains( MOD_METHOD )
+          || currentFlags.contains( MUL_METHOD ) || currentFlags.contains( SUB_METHOD ) ) {
         current = new AddOpsAdapter( current );
       }
 

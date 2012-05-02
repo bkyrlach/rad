@@ -265,6 +265,8 @@ public final class ASMOpMethod implements Opcodes {
       mv.visitInsn( DADD );
     } else if ( "div".equals( op ) ) {
       mv.visitInsn( DDIV );
+    } else if ( "mod".equals( op ) ) {
+      mv.visitInsn( DREM );
     } else if ( "mult".equals( op ) ) {
       mv.visitInsn( DMUL );
     } else if ( "sub".equals( op ) ) {

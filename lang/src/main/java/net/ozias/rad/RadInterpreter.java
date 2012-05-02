@@ -168,7 +168,7 @@ public class RadInterpreter implements Runnable {
       BaseFactory.addFlag( op );
       final Object base = BaseFactory.newInstance();
       final Method evalOp = base.getClass().getDeclaredMethod( "evalOp", String.class, List.class );
-      retnum = ( Number ) evalOp.invoke( base, new Object[] { op.toUpperCase( Locale.US ), numbers } ); // numbers.toArray( new Integer[] {} )
+      retnum = ( Number ) evalOp.invoke( base, new Object[] { op.toUpperCase( Locale.US ), numbers } );
     } catch ( ClassNotFoundException e ) {
       LOG.error( e.getMessage() );
     } catch ( NoSuchMethodException e ) {

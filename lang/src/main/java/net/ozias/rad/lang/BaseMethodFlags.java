@@ -10,5 +10,5 @@ public enum BaseMethodFlags {
 
   //~ Enum constants -------------------------------------------------------------------------------------------------------------------------------------------
 
-  ADD_METHOD, SUB_METHOD, MUL_METHOD, DIV_METHOD;
+  ADD_METHOD, DIV_METHOD, MOD_METHOD, MUL_METHOD, SUB_METHOD;
 }

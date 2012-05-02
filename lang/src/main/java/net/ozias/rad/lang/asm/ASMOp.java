@@ -8,6 +8,7 @@ import static net.ozias.rad.lang.asm.ASMConstants.LOC1;
 import static net.ozias.rad.lang.asm.ASMConstants.LOC2;
 import static net.ozias.rad.lang.asm.ASMConstants.LOC3;
 import static net.ozias.rad.lang.asm.ASMConstants.LOC4;
+import static net.ozias.rad.lang.asm.ASMConstants.LOC5;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
@@ -40,6 +41,8 @@ public final class ASMOp implements Opcodes {
   private static final String SUB = "SUB";
   /** ADD enum constant. */
   private static final String ADD = "ADD";
+  /** MOD enum constant. */
+  private static final String MOD = "MOD";
 
   static {
     INIT = ASMConstants.INIT;
@@ -69,9 +72,10 @@ public final class ASMOp implements Opcodes {
     cw.visit( V1_7, ACC_PUBLIC + ACC_FINAL + ACC_SUPER + ACC_ENUM, OP, "Ljava/lang/Enum<LOp;>;", "java/lang/Enum", null );
 
     visitAddField( cw );
-    visitSubField( cw );
-    visitMulField( cw );
     visitDivField( cw );
+    visitModField( cw );
+    visitMulField( cw );
+    visitSubField( cw );
     visitValuesField( cw );
     visitValuesMethod( cw );
     visitValueOfMethod( cw );
@@ -109,23 +113,29 @@ public final class ASMOp implements Opcodes {
     mv.visitFieldInsn( PUTSTATIC, OP, ADD, OP_OBJ );
     mv.visitTypeInsn( NEW, OP );
     mv.visitInsn( DUP );
-    mv.visitLdcInsn( SUB );
+    mv.visitLdcInsn( DIV );
     mv.visitInsn( ICONST_1 );
     mv.visitMethodInsn( INVOKESPECIAL, OP, INIT, INIT_SIG );
-    mv.visitFieldInsn( PUTSTATIC, OP, SUB, OP_OBJ );
+    mv.visitFieldInsn( PUTSTATIC, OP, DIV, OP_OBJ );
+    mv.visitTypeInsn( NEW, OP );
+    mv.visitInsn( DUP );
+    mv.visitLdcInsn( MOD );
+    mv.visitInsn( ICONST_2 );
+    mv.visitMethodInsn( INVOKESPECIAL, OP, INIT, INIT_SIG );
+    mv.visitFieldInsn( PUTSTATIC, OP, MOD, OP_OBJ );
     mv.visitTypeInsn( NEW, OP );
     mv.visitInsn( DUP );
     mv.visitLdcInsn( MUL );
-    mv.visitInsn( ICONST_2 );
+    mv.visitInsn( ICONST_3 );
     mv.visitMethodInsn( INVOKESPECIAL, OP, INIT, INIT_SIG );
     mv.visitFieldInsn( PUTSTATIC, OP, MUL, OP_OBJ );
     mv.visitTypeInsn( NEW, OP );
     mv.visitInsn( DUP );
-    mv.visitLdcInsn( DIV );
-    mv.visitInsn( ICONST_3 );
-    mv.visitMethodInsn( INVOKESPECIAL, OP, INIT, INIT_SIG );
-    mv.visitFieldInsn( PUTSTATIC, OP, DIV, OP_OBJ );
+    mv.visitLdcInsn( SUB );
     mv.visitInsn( ICONST_4 );
+    mv.visitMethodInsn( INVOKESPECIAL, OP, INIT, INIT_SIG );
+    mv.visitFieldInsn( PUTSTATIC, OP, SUB, OP_OBJ );
+    mv.visitInsn( ICONST_5 );
     mv.visitTypeInsn( ANEWARRAY, OP );
     mv.visitInsn( DUP );
     mv.visitInsn( ICONST_0 );
@@ -133,17 +143,21 @@ public final class ASMOp implements Opcodes {
     mv.visitInsn( AASTORE );
     mv.visitInsn( DUP );
     mv.visitInsn( ICONST_1 );
-    mv.visitFieldInsn( GETSTATIC, OP, SUB, OP_OBJ );
+    mv.visitFieldInsn( GETSTATIC, OP, DIV, OP_OBJ );
     mv.visitInsn( AASTORE );
     mv.visitInsn( DUP );
     mv.visitInsn( ICONST_2 );
-    mv.visitFieldInsn( GETSTATIC, OP, MUL, OP_OBJ );
+    mv.visitFieldInsn( GETSTATIC, OP, MOD, OP_OBJ );
     mv.visitInsn( AASTORE );
     mv.visitInsn( DUP );
     mv.visitInsn( ICONST_3 );
-    mv.visitFieldInsn( GETSTATIC, OP, DIV, OP_OBJ );
+    mv.visitFieldInsn( GETSTATIC, OP, MUL, OP_OBJ );
     mv.visitInsn( AASTORE );
-    mv.visitFieldInsn( PUTSTATIC, OP, "$VALUES", OP_OBJ_ARR );
+    mv.visitInsn( DUP );
+    mv.visitInsn( ICONST_4 );
+    mv.visitFieldInsn( GETSTATIC, OP, SUB, OP_OBJ );
+    mv.visitInsn( AASTORE );
+    mv.visitFieldInsn( PUTSTATIC, OP, "ENUM$VALUES", OP_OBJ_ARR );
     mv.visitInsn( RETURN );
     mv.visitMaxs( LOC4, LOC0 );
     mv.visitEnd();
@@ -165,7 +179,7 @@ public final class ASMOp implements Opcodes {
    * @param  cw  The ClassVisitor to visit.
    */
   private static void visitInitMethod( final ClassWriter cw ) {
-    final MethodVisitor mv = cw.visitMethod( ACC_PRIVATE, INIT, INIT_SIG, "()V", null );
+    final MethodVisitor mv = cw.visitMethod( ACC_PRIVATE, INIT, INIT_SIG, null, null );
     mv.visitCode();
     mv.visitVarInsn( ALOAD, LOC0 );
     mv.visitVarInsn( ALOAD, LOC1 );
@@ -174,6 +188,16 @@ public final class ASMOp implements Opcodes {
     mv.visitInsn( RETURN );
     mv.visitMaxs( LOC3, LOC3 );
     mv.visitEnd();
+  }
+
+  /**
+   * Visit the MOD enum field.
+   *
+   * @param  cw  The ClassVisitor to visit.
+   */
+  private static void visitModField( final ClassWriter cw ) {
+    final FieldVisitor fv = cw.visitField( ACC_PUBLIC + ACC_FINAL + ACC_STATIC + ACC_ENUM, MOD, OP_OBJ, null, null );
+    fv.visitEnd();
   }
 
   /**
@@ -219,7 +243,7 @@ public final class ASMOp implements Opcodes {
    * @param  cw  The ClassVisitor to visit.
    */
   private static void visitValuesField( final ClassWriter cw ) {
-    final FieldVisitor fv = cw.visitField( ACC_PRIVATE + ACC_FINAL + ACC_STATIC + ACC_SYNTHETIC, "$VALUES", OP_OBJ_ARR, null, null );
+    final FieldVisitor fv = cw.visitField( ACC_PRIVATE + ACC_FINAL + ACC_STATIC + ACC_SYNTHETIC, "ENUM$VALUES", OP_OBJ_ARR, null, null );
     fv.visitEnd();
   }
 
@@ -231,11 +255,23 @@ public final class ASMOp implements Opcodes {
   private static void visitValuesMethod( final ClassWriter cw ) {
     final MethodVisitor mv = cw.visitMethod( ACC_PUBLIC + ACC_STATIC, "values", "()[LOp;", null, null );
     mv.visitCode();
-    mv.visitFieldInsn( GETSTATIC, OP, "$VALUES", OP_OBJ_ARR );
-    mv.visitMethodInsn( INVOKEVIRTUAL, OP_OBJ_ARR, "clone", "()Ljava/lang/Object;" );
-    mv.visitTypeInsn( CHECKCAST, OP_OBJ_ARR );
+    mv.visitFieldInsn( GETSTATIC, OP, "ENUM$VALUES", OP_OBJ_ARR );
+    mv.visitInsn( DUP );
+    mv.visitVarInsn( ASTORE, LOC0 );
+    mv.visitInsn( ICONST_0 );
+    mv.visitVarInsn( ALOAD, LOC0 );
+    mv.visitInsn( ARRAYLENGTH );
+    mv.visitInsn( DUP );
+    mv.visitVarInsn( ISTORE, LOC1 );
+    mv.visitTypeInsn( ANEWARRAY, OP );
+    mv.visitInsn( DUP );
+    mv.visitVarInsn( ASTORE, LOC2 );
+    mv.visitInsn( ICONST_0 );
+    mv.visitVarInsn( ILOAD, LOC1 );
+    mv.visitMethodInsn( INVOKESTATIC, "java/lang/System", "arraycopy", "(Ljava/lang/Object;ILjava/lang/Object;II)V" );
+    mv.visitVarInsn( ALOAD, LOC2 );
     mv.visitInsn( ARETURN );
-    mv.visitMaxs( LOC1, LOC0 );
+    mv.visitMaxs( LOC5, LOC3 );
     mv.visitEnd();
   }
 }
