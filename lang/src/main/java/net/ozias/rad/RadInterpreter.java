@@ -3,14 +3,15 @@
  */
 package net.ozias.rad;
 
+import net.ozias.rad.lang.ASTExpression;
 import net.ozias.rad.lang.ASTNegativePrimary;
 import net.ozias.rad.lang.ASTNumber;
 import net.ozias.rad.lang.ASTOpFunction;
+import net.ozias.rad.lang.ASTPrimary;
+import net.ozias.rad.lang.ASTTerm;
 import net.ozias.rad.lang.BaseFactory;
-import net.ozias.rad.lang.ParseException;
 import net.ozias.rad.lang.Parser;
 import net.ozias.rad.lang.SimpleNode;
-import net.ozias.rad.lang.TokenMgrError;
 
 import org.apache.log4j.Logger;
 
@@ -21,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
@@ -68,19 +70,48 @@ public class RadInterpreter implements Runnable {
 
           break;
         } else {
-
-          try {
-            writer.println( evaluateOpFunction( Parser.parseOpFunction( token ) ) );
-          } catch ( ParseException e ) {
-            writer.println( e.getMessage() );
-          } catch ( TokenMgrError e ) {
-            writer.println( e.getMessage() );
-          }
-
+          writer.println( evaluateExpression( Parser.parseExpression( token ) ) );
           prompt.print();
         }
       }
     }
+  }
+
+  /**
+   * Evaluate an expression node.
+   *
+   * @param   node  The node to evaluate as an expression.
+   *
+   * @return  The evaluated expression value.
+   */
+  private Number evaluateExpression( final SimpleNode node ) {
+    Number retnum = -1;
+
+    if ( node != null ) {
+      final int count = node.jjtGetNumChildren();
+      final LinkedList<Object> expression = new LinkedList<Object>();
+
+      for ( int i = 0; i < count; i++ ) {
+        final SimpleNode childNode = ( SimpleNode ) node.jjtGetChild( i );
+
+        if ( childNode instanceof ASTTerm ) {
+          Number currentTerm = evaluateTerm( childNode );
+          Object popped = expression.peek();
+
+          if ( ( popped != null ) && ( popped instanceof String ) ) {
+            popped = expression.pop();
+            currentTerm = invoke( ( String ) popped, populateNumbers( ( Number ) expression.pop(), currentTerm ) );
+          }
+          expression.push( currentTerm );
+        } else {
+          expression.push( childNode.jjtGetValue() );
+        }
+      }
+
+      retnum = ( Number ) expression.pop();
+    }
+
+    return retnum;
   }
 
   /**
@@ -121,14 +152,20 @@ public class RadInterpreter implements Runnable {
    * @return  Currently, the sum of all the expression primaries.
    */
   private Number evaluateOpFunction( final SimpleNode node ) {
-    final String op = ( String ) node.jjtGetValue();
-    final List<Number> numbers = new ArrayList<Number>();
+    Number retnum = -1;
 
-    for ( int i = 0; i < node.jjtGetNumChildren(); i++ ) {
-      numbers.add( evaluatePrimary( ( SimpleNode ) node.jjtGetChild( i ) ) );
+    if ( node != null ) {
+      final String op = ( String ) node.jjtGetValue();
+      final List<Number> numbers = new ArrayList<Number>();
+
+      for ( int i = 0; i < node.jjtGetNumChildren(); i++ ) {
+        numbers.add( evaluatePrimary( ( SimpleNode ) node.jjtGetChild( i ) ) );
+      }
+
+      retnum = invoke( op, numbers );
     }
 
-    return invoke( op, numbers );
+    return retnum;
   }
 
   /**
@@ -148,9 +185,43 @@ public class RadInterpreter implements Runnable {
       retnum = evaluateNegativePrimary( childNode );
     } else if ( childNode instanceof ASTOpFunction ) {
       retnum = evaluateOpFunction( childNode );
+    } else if ( childNode instanceof ASTExpression ) {
+      retnum = evaluateExpression( childNode );
     }
 
     return retnum;
+  }
+
+  /**
+   * Evaluate a term.
+   *
+   * @param   node  The node to evaluate as a term.
+   *
+   * @return  The value of the term.
+   */
+  private Number evaluateTerm( final SimpleNode node ) {
+
+    final int count = node.jjtGetNumChildren();
+    final LinkedList<Object> expression = new LinkedList<Object>();
+
+    for ( int i = 0; i < count; i++ ) {
+      final SimpleNode childNode = ( SimpleNode ) node.jjtGetChild( i );
+
+      if ( childNode instanceof ASTPrimary ) {
+        Number currentTerm = evaluatePrimary( childNode );
+        Object popped = expression.peek();
+
+        if ( ( popped != null ) && ( popped instanceof String ) ) {
+          popped = expression.pop();
+          currentTerm = invoke( ( String ) popped, populateNumbers( ( Number ) expression.pop(), currentTerm ) );
+        }
+        expression.push( currentTerm );
+      } else {
+        expression.push( childNode.jjtGetValue() );
+      }
+    }
+
+    return ( Number ) expression.pop();
   }
 
   /**
@@ -163,12 +234,25 @@ public class RadInterpreter implements Runnable {
    */
   private Number invoke( final String op, final List<Number> numbers ) {
     Number retnum = null;
+    String localOp = op;
+
+    if ( "+".equals( op ) ) {
+      localOp = "ADD";
+    } else if ( "-".equals( op ) ) {
+      localOp = "SUB";
+    } else if ( "*".equals( op ) ) {
+      localOp = "MUL";
+    } else if ( "/".equals( op ) ) {
+      localOp = "DIV";
+    } else if ( "%".equals( op ) ) {
+      localOp = "MOD";
+    }
 
     try {
-      BaseFactory.addFlag( op );
+      BaseFactory.addFlag( localOp );
       final Object base = BaseFactory.newInstance();
       final Method evalOp = base.getClass().getDeclaredMethod( "evalOp", String.class, List.class );
-      retnum = ( Number ) evalOp.invoke( base, new Object[] { op.toUpperCase( Locale.US ), numbers } );
+      retnum = ( Number ) evalOp.invoke( base, new Object[] { localOp.toUpperCase( Locale.US ), numbers } );
     } catch ( ClassNotFoundException e ) {
       LOG.error( e.getMessage() );
     } catch ( NoSuchMethodException e ) {
@@ -182,6 +266,22 @@ public class RadInterpreter implements Runnable {
     }
 
     return retnum;
+  }
+
+  /**
+   * Populate the numbers list.
+   *
+   * @param   previousTerm  The previous term.
+   * @param   currentTerm   The current term.
+   *
+   * @return  The list of numbers.
+   */
+  private List<Number> populateNumbers( final Number previousTerm, final Number currentTerm ) {
+    final List<Number> numbers = new ArrayList<Number>();
+    numbers.add( previousTerm );
+    numbers.add( currentTerm );
+
+    return numbers;
   }
 
   //~ Inner Classes --------------------------------------------------------------------------------------------------------------------------------------------

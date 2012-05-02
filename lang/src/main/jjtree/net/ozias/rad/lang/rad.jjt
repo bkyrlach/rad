@@ -14,8 +14,11 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 
-public class Parser {
+import org.apache.log4j.Logger;
 
+public class Parser {
+  public final static Logger LOG = Logger.getLogger( Parser.class );
+  
   public static SimpleNode parseFile( final InputStream stream ) throws FileNotFoundException, ParseException, TokenMgrError {
     final Parser parser = new Parser( stream );
     parser.rad();
@@ -27,15 +30,19 @@ public class Parser {
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
 
-  public static SimpleNode parseExpression( final String string ) throws ParseException, TokenMgrError {    final Parser parser = new Parser( new ByteArrayInputStream( string.getBytes() ) );
-    parser.Expression();
-    return ( SimpleNode ) parser.jjtree.rootNode();
-  }
-
-  public static SimpleNode parseOpFunction( final String string ) throws ParseException, TokenMgrError {
-    final Parser parser = new Parser( new ByteArrayInputStream( string.getBytes() ) );
-    parser.OpFunction();
-    return ( SimpleNode ) parser.jjtree.rootNode();
+  public static SimpleNode parseExpression( final String string ) {    final Parser parser = new Parser( new ByteArrayInputStream( string.getBytes() ) );
+    SimpleNode retnode = null;
+    
+    try {
+      parser.Expression();
+      retnode = ( SimpleNode ) parser.jjtree.rootNode();
+    } catch ( ParseException e ) {
+      LOG.error( e.getMessage(), e );
+    } catch ( TokenMgrError e ) {
+      LOG.error( e.getMessage(), e );
+    }
+    
+    return retnode;
   }
 }
 
@@ -56,6 +63,7 @@ TOKEN : { < PLUS : "+" > }
 TOKEN : { < MINUS : "-" > }
 TOKEN : { < MULT : "*" > }
 TOKEN : { < DIV : "/" > }
+TOKEN : { < MOD : "%" > }
 
 // Numbers
 TOKEN : {
@@ -199,7 +207,7 @@ void Primary() :
   (
     Number()
   | OpFunction()
-  | Expression()
+  | < OPEN_PAR > Expression() < CLOSE_PAR >
   | NegativePrimary()  )}
 
 void NegativePrimary()  :
@@ -223,16 +231,47 @@ void OpFunction() :{ Token t; }
   { jjtThis.jjtSetValue( t.image ); }}
 
 void Term() :
-{ Token t = null; }
+{}
 {
-  Primary() ( t=< MULT > Primary() | t=< DIV > Primary() )*
-  { jjtThis.jjtSetValue( t.image ); }}
+  Primary() ( Mult() Primary() | Div() Primary() | Mod() Primary() )*}
 
 void Expression() :
-{ Token t = null; }
+{}
 {
-  < OPEN_PAR > Term() ( t=< PLUS > Term() | t=< MINUS > Term() )* < CLOSE_PAR >
-  { jjtThis.jjtSetValue( t.image ); }}
+  Term() ( Plus() Term() | Minus() Term() )*}
+
+void Plus() #Plus :
+{ Token t; }
+{  t=< PLUS >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+void Minus() #Minus :
+{ Token t; }
+{
+  t=< MINUS >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Mult() #Mult :
+{ Token t; }
+{
+  t=< MULT >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Div() #Div :
+{ Token t; }
+{
+  t=< DIV >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Mod() #Mod :
+{ Token t; }
+{
+  t=< MOD >
+  { jjtThis.jjtSetValue( t.image ); }
+}
 
 void Id() #Id :
 { Token t; }

@@ -10,4 +10,5 @@ do
   esac
 done
 
+#java -Dlog4j.configuration=jar:file:lang/target/rad-lang-1.0-SB-SNAPSHOT.jar!/log4j.xml ${DEBUG} -jar lang/target/rad-lang-1.0-SB-SNAPSHOT.jar
 java ${DEBUG} -jar lang/target/rad-lang-1.0-SB-SNAPSHOT.jar
