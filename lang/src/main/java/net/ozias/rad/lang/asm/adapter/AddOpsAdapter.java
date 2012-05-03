@@ -5,30 +5,18 @@ package net.ozias.rad.lang.asm.adapter;
 
 import net.ozias.rad.lang.asm.ASMOps;
 
-import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 /**
  * An ASM adapter used to add an add method to a class.
  */
-public class AddOpsAdapter extends ClassVisitor implements Opcodes {
+public class AddOpsAdapter extends AbstractChainableAdapter implements Opcodes {
 
   //~ Instance fields ------------------------------------------------------------------------------------------------------------------------------------------
 
   /** Is the add method already present. */
   private transient boolean isMethodPresent = false;
-
-  //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
-
-  /**
-   * Creates a new AddOpsAdapter object.
-   *
-   * @param  cv  The class visitor this adapter is intercepting visits from.
-   */
-  public AddOpsAdapter( final ClassVisitor cv ) {
-    super( ASM4, cv );
-  }
 
   //~ Methods --------------------------------------------------------------------------------------------------------------------------------------------------
 

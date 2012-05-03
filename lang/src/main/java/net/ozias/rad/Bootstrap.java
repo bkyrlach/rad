@@ -3,11 +3,12 @@
  */
 package net.ozias.rad;
 
-import net.ozias.rad.lang.BaseFactory;
+import static net.ozias.rad.lang.asm.ASMConstants.BASE_CN;
+
+import net.ozias.rad.lang.Invoker;
+import net.ozias.rad.lang.RadInvoker;
 
 import org.apache.log4j.Logger;
-
-import java.lang.reflect.InvocationTargetException;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -69,32 +70,20 @@ public class Bootstrap implements Runnable {
    * @see  java.lang.Runnable#run()
    */
   @Override public void run() {
+    Invoker.addInvoker( BASE_CN, new RadInvoker( BASE_CN ) );
+    Invoker.setCurrentObjectName( BASE_CN );
 
-    try {
-      BaseFactory.newInstance();
+    addRunnable( new RadInterpreter() );
 
-      addRunnable( new RadInterpreter() );
+    for ( final Future<?> future : FUTURES ) {
 
-      for ( final Future<?> future : FUTURES ) {
-
-        try {
-          future.get();
-        } catch ( InterruptedException e ) {
-          LOG.error( "InterruptedException", e );
-        } catch ( ExecutionException e ) {
-          LOG.error( "ExecutionException", e );
-        }
+      try {
+        future.get();
+      } catch ( InterruptedException e ) {
+        LOG.error( "InterruptedException", e );
+      } catch ( ExecutionException e ) {
+        LOG.error( "ExecutionException", e );
       }
-    } catch ( ClassNotFoundException e ) {
-      LOG.error( e );
-    } catch ( NoSuchMethodException e ) {
-      LOG.error( e );
-    } catch ( InstantiationException e ) {
-      LOG.error( e );
-    } catch ( IllegalAccessException e ) {
-      LOG.error( e );
-    } catch ( InvocationTargetException e ) {
-      LOG.error( e );
     }
   }
 }

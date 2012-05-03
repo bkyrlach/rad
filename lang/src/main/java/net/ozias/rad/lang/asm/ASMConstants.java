@@ -10,12 +10,24 @@ public final class ASMConstants {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
+  /** Default base object namespace. */
+  public static final String BASE_NS = "net.ozias.rad.lang";
+  /** Name of the base class for use with class loaders. */
+  public static final String BASE_CN = BASE_NS + ".Base";
+  /** Name of the base class for use with ASM. */
+  public static final String BASE_ASM_CN = BASE_CN.replace( '.', '/' );
   /** Object Identifier. */
   private static final String OBJ = "L";
   /** Semicolon. */
   private static final String SEMI = ";";
   /** Array Identifier. */
   private static final String ARR = "[";
+  /** Left Parenthesis. */
+  private static final String L_PAREN = "(";
+  /** Right Parenthesis. */
+  private static final String R_PAREN = ")";
+  /** Void type. */
+  private static final String VOID = "V";
   /** Local Variable 0. */
   public static final int LOC0 = 0;
   /** Local Variable 1. */
@@ -73,6 +85,17 @@ public final class ASMConstants {
   //~ Methods --------------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
+   * Get the default getter signature.
+   *
+   * @param   type  The return type of the getter.
+   *
+   * @return  The getter signature.
+   */
+  public static String getGetterSignature( final String type ) {
+    return new StringBuilder( L_PAREN ).append( R_PAREN ).append( getObject( type ) ).toString();
+  }
+
+  /**
    * Get the object representation of the given name.
    *
    * @param   name  The name to make into an Object representation.
@@ -92,5 +115,16 @@ public final class ASMConstants {
    */
   public static String getObjectArray( final String name ) {
     return new StringBuilder( ARR ).append( OBJ ).append( name ).append( SEMI ).toString();
+  }
+
+  /**
+   * Get the default setter signature.
+   *
+   * @param   type  The parameter type of the setter.
+   *
+   * @return  The setter signature.
+   */
+  public static String getSetterSignature( final String type ) {
+    return new StringBuilder( L_PAREN ).append( getObject( type ) ).append( R_PAREN ).append( VOID ).toString();
   }
 }

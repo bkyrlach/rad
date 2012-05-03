@@ -3,10 +3,9 @@
  */
 package net.ozias.rad.lang.eval;
 
-import static net.ozias.rad.lang.BaseInvoker.invoke;
-
 import net.ozias.rad.lang.ASTPrimary;
 import net.ozias.rad.lang.ASTTerm;
+import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
 
 import java.util.ArrayList;
@@ -70,6 +69,8 @@ public final class Term implements Evaluatable {
   @Override public Number evaluate( final SimpleNode node ) {
 
     if ( node instanceof ASTTerm ) {
+      final Class<?>[] parameterTypes = new Class<?>[] { String.class, List.class };
+      final Object[] parameters = new Object[parameterTypes.length];
       final int count = node.jjtGetNumChildren();
       final LinkedList<Object> expression = new LinkedList<Object>();
 
@@ -82,7 +83,9 @@ public final class Term implements Evaluatable {
 
           if ( ( popped != null ) && ( popped instanceof String ) ) {
             popped = expression.pop();
-            currentTerm = invoke( ( String ) popped, populateNumbers( ( Number ) expression.pop(), currentTerm ) );
+            parameters[0] = ( String ) popped;
+            parameters[1] = populateNumbers( ( Number ) expression.pop(), currentTerm );
+            currentTerm = ( Number ) Invoker.invoke( "evalOp", parameterTypes, parameters );
           }
           expression.push( currentTerm );
         } else {

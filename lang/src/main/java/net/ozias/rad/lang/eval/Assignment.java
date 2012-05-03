@@ -3,31 +3,27 @@
  */
 package net.ozias.rad.lang.eval;
 
-import net.ozias.rad.lang.ASTOpFunction;
-import net.ozias.rad.lang.Invoker;
+import net.ozias.rad.lang.ASTAssignment;
 import net.ozias.rad.lang.SimpleNode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * Evaluate an ASTOpFunction node.
+ * Evaluates an ASTAssignment node.
  */
-public final class OpFunction implements Evaluatable {
+public final class Assignment implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static OpFunction instance = null;
+  private static Assignment instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new OpFunction object.
+   * Creates a new Expression object.
    */
-  private OpFunction() {
+  private Assignment() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -49,12 +45,12 @@ public final class OpFunction implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static OpFunction getInstance() {
+  public static Assignment getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new OpFunction();
+        instance = new Assignment();
       }
     }
 
@@ -66,24 +62,14 @@ public final class OpFunction implements Evaluatable {
    */
   @Override public Number evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTOpFunction ) {
-      Number retnum = -1;
+    if ( node instanceof ASTAssignment ) {
+      // final String identifier = ( String ) node.jjtGetValue();
+      // final Number value =
+      Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
 
-      if ( node != null ) {
-        final String op = ( String ) node.jjtGetValue();
-        final List<Number> numbers = new ArrayList<Number>();
-
-        for ( int i = 0; i < node.jjtGetNumChildren(); i++ ) {
-          numbers.add( Primary.eval( ( SimpleNode ) node.jjtGetChild( i ) ) );
-        }
-
-        retnum = ( Number ) Invoker.invoke( "evalOp", new Class<?>[] { String.class, List.class }, new Object[] { op, numbers } );
-      }
-
-      return retnum;
+      return -1;
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTOpFunction node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTAssignment node" );
     }
   }
-
 }

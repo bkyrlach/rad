@@ -40,6 +40,7 @@ public class RadInterpreter implements Runnable {
       scanner.useDelimiter( System.getProperty( "line.separator" ) );
 
       writer.println( "Welcome to the R@d Intepreter!" );
+      writer.println( "Enter help to get started." );
       prompt.print();
 
       while ( scanner.hasNext() ) {

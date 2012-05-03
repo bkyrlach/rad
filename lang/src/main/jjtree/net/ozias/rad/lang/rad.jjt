@@ -206,7 +206,7 @@ void Statement() :
 void Assignment() :
 { Token t; }
 {
-  t=< ID > "=" Expression() ";"
+  t=< ID > "=" Expression()
   { jjtThis.jjtSetValue( t.image ); }}
 
 void Expression() :

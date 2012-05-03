@@ -77,7 +77,7 @@ public final class Statement implements Evaluatable {
         if ( child instanceof ASTExpression ) {
           retstr = Expression.eval( child ).toString();
         } else if ( child instanceof ASTAssignment ) {
-          retstr = "Assignment expression detected.  Not implemented.";
+          retstr = Assignment.eval( child ).toString();
         } else if ( child instanceof ASTNamespace ) {
           retstr = Namespace.eval( child );
         } else if ( child instanceof ASTUse ) {

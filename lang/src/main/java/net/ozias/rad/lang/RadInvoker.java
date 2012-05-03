@@ -3,64 +3,107 @@
  */
 package net.ozias.rad.lang;
 
+import net.ozias.rad.lang.asm.ASMField;
+import net.ozias.rad.lang.asm.adapter.AbstractChainableAdapter;
+import net.ozias.rad.lang.asm.adapter.AddFieldAdapter;
+import net.ozias.rad.lang.asm.adapter.AddOpsAdapter;
+
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Invoke stuff in the base R@d object.
+ * Invoke stuff on R@d objects.
  */
-public final class BaseInvoker {
+public class RadInvoker {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Error loading state string. */
   private static final String ERROR_LOADING_STATE = "Error loading state.";
   /** log4j Logger. */
-  private static final Logger LOG = Logger.getLogger( BaseInvoker.class );
-  /** The current base object. */
-  private static Object currentBase = null;
+  private static final Logger LOG = Logger.getLogger( RadInvoker.class );
+
+  //~ Instance fields ------------------------------------------------------------------------------------------------------------------------------------------
+
+  /** The field adapters that have been added to the factory chain. */
+  private final transient List<AbstractChainableAdapter> fieldAdapters = new ArrayList<AbstractChainableAdapter>();
+  /** The map of R@d objects to their associated RadFactory. */
+  private final transient RadFactory radFactory;
+
+  /** The AddOpsAdapter. */
+  private transient AddOpsAdapter addOpsAdapter = null;
+  /** The current object. */
+  private transient Object currentObject = null;
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new BaseInvoker object.
+   * Creates a new RadInvoker object.
+   *
+   * @param  objectName  The name of the object this invoker is associated with.
    */
-  private BaseInvoker() {
-    // Ensures this cannot be instantiated through normal means.
+  public RadInvoker( final String objectName ) {
+    this.radFactory = new RadFactory( objectName );
   }
 
   //~ Methods --------------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Get the current namespace.
+   * Add a field (plus getter/setter) to the base R@d object.
    *
-   * @return  The current namespace as a String.
+   * @param   object      The object to add the field to.
+   * @param   identifier  The field identifier.
+   * @param   type        The field type.
+   * @param   value       The field value.
+   *
+   * @return  The result of the field being set.
    */
-  public static String currentNamespace() {
-    String retstr = null;
+  public Object addField( final String object, final String identifier, final String type, final Object value ) {
+    Object retobj = null;
+    boolean create = true;
+
+    if ( currentObject != null ) {
+      final Class<?> clazz = currentObject.getClass();
+
+      try {
+        clazz.getDeclaredField( identifier );
+        create = false;
+      } catch ( final NoSuchFieldException e ) {
+        LOG.debug( "Unable to access field.", e );
+      } catch ( final SecurityException e ) {
+        LOG.error( "Unable to access field.", e );
+        create = false;
+      }
+    }
 
     try {
 
-      if ( BaseFactory.addFlag( "NS" ) ) {
+      if ( create ) {
+        // Field doesn't exist, so create it.
+        final AddFieldAdapter addFieldAdapter = new AddFieldAdapter( object, identifier, type );
+        fieldAdapters.add( addFieldAdapter );
+        radFactory.addAdapter( addFieldAdapter );
         final Map<String, Object> fieldMap = saveState();
-        currentBase = BaseFactory.newInstance();
+        currentObject = radFactory.newInstance();
         loadState( fieldMap );
       }
-      final Method getCN = currentBase.getClass().getDeclaredMethod( "getCurrentNamespace", ( Class<?>[] ) null );
-      retstr = ( String ) getCN.invoke( currentBase, ( Object[] ) null );
 
-      if ( retstr == null ) {
-        retstr = currentBase.getClass().getPackage().getName();
-        final Method setCN = currentBase.getClass().getDeclaredMethod( "setCurrentNamespace", String.class );
-        setCN.invoke( currentBase, retstr );
+      final Method getCN = currentObject.getClass().getDeclaredMethod( ASMField.getter( identifier ), ( Class<?>[] ) null );
+      retobj = getCN.invoke( currentObject, ( Object[] ) null );
+
+      if ( retobj == null ) {
+        final Method setCN = currentObject.getClass().getDeclaredMethod( ASMField.setter( identifier ), String.class );
+        setCN.invoke( currentObject, value );
+        retobj = value;
       }
     } catch ( ClassNotFoundException e ) {
       LOG.error( e.getMessage() );
@@ -74,7 +117,7 @@ public final class BaseInvoker {
       LOG.error( e.getMessage() );
     }
 
-    return retstr;
+    return retobj;
   }
 
   /**
@@ -85,7 +128,7 @@ public final class BaseInvoker {
    *
    * @return  The result of the operation on the numbers.
    */
-  public static Number invoke( final String op, final List<Number> numbers ) {
+  public Number evalOp( final String op, final List<Number> numbers ) {
     Number retnum = null;
     String localOp = op;
 
@@ -103,13 +146,15 @@ public final class BaseInvoker {
 
     try {
 
-      if ( BaseFactory.addFlag( localOp ) ) {
+      if ( addOpsAdapter == null ) {
+        addOpsAdapter = new AddOpsAdapter();
+        radFactory.addAdapter( addOpsAdapter );
         final Map<String, Object> fieldMap = saveState();
-        currentBase = BaseFactory.newInstance();
+        currentObject = radFactory.newInstance();
         loadState( fieldMap );
       }
-      final Method evalOp = currentBase.getClass().getDeclaredMethod( "evalOp", String.class, List.class );
-      retnum = ( Number ) evalOp.invoke( currentBase, new Object[] { localOp.toUpperCase( Locale.US ), numbers } );
+      final Method evalOp = currentObject.getClass().getDeclaredMethod( "evalOp", String.class, List.class );
+      retnum = ( Number ) evalOp.invoke( currentObject, new Object[] { localOp.toUpperCase( Locale.US ), numbers } );
     } catch ( ClassNotFoundException e ) {
       LOG.error( e.getMessage() );
     } catch ( NoSuchMethodException e ) {
@@ -130,15 +175,15 @@ public final class BaseInvoker {
    *
    * @param  fieldMap  The state information from the previous base object incarnation.
    */
-  private static void loadState( final Map<String, Object> fieldMap ) {
+  private void loadState( final Map<String, Object> fieldMap ) {
 
     for ( final String fieldName : fieldMap.keySet() ) {
 
       try {
-        final Field field = currentBase.getClass().getDeclaredField( fieldName );
+        final Field field = currentObject.getClass().getDeclaredField( fieldName );
         final boolean accessible = field.isAccessible();
         field.setAccessible( true );
-        field.set( currentBase, fieldMap.get( fieldName ) );
+        field.set( currentObject, fieldMap.get( fieldName ) );
         field.setAccessible( accessible );
       } catch ( IllegalArgumentException e ) {
         LOG.error( ERROR_LOADING_STATE, e );
@@ -158,17 +203,17 @@ public final class BaseInvoker {
    *
    * @return  A map of field names to field values.
    */
-  private static Map<String, Object> saveState() {
+  private Map<String, Object> saveState() {
     final Map<String, Object> fieldMap = new TreeMap<String, Object>();
 
-    if ( currentBase != null ) {
+    if ( currentObject != null ) {
 
-      for ( final Field field : currentBase.getClass().getDeclaredFields() ) {
+      for ( final Field field : currentObject.getClass().getDeclaredFields() ) {
         final boolean accessible = field.isAccessible();
         field.setAccessible( true );
 
         try {
-          fieldMap.put( field.getName(), field.get( currentBase ) );
+          fieldMap.put( field.getName(), field.get( currentObject ) );
         } catch ( IllegalArgumentException e ) {
           LOG.error( "Error saving state.", e );
         } catch ( IllegalAccessException e ) {

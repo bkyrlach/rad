@@ -3,8 +3,11 @@
  */
 package net.ozias.rad.lang.eval;
 
+import static net.ozias.rad.lang.asm.ASMConstants.BASE_ASM_CN;
+import static net.ozias.rad.lang.asm.ASMConstants.BASE_NS;
+
 import net.ozias.rad.lang.ASTNamespace;
-import net.ozias.rad.lang.BaseInvoker;
+import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
@@ -69,7 +72,8 @@ public final class Namespace implements Evaluatable {
       if ( node.jjtGetNumChildren() == 1 ) {
         retstr = Name.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
       } else {
-        retstr = BaseInvoker.currentNamespace();
+        retstr = ( String ) Invoker.invoke( "addField", new Class<?>[] { String.class, String.class, String.class, Object.class },
+            new Object[] { BASE_ASM_CN, "currentNamespace", "java/lang/String", BASE_NS } );
       }
     } else {
       throw new IllegalArgumentException( "Supplied node is not an ASTNamespace node." );
