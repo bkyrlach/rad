@@ -144,18 +144,6 @@ TOKEN: {
   ] >
 }
 
-// Use
-TOKEN :
-{
-  < USE: < ID > ( "." < ID > )? "." < ID > >
-}
-
-// Namespace
-TOKEN :
-{
-  < NAMESPACE: < ID > ( "." < ID > )* >
-}
-
 void rad() : {}
 {
     [Namespace() ";"]
@@ -165,20 +153,26 @@ void rad() : {}
 }
 
 void Namespace() :
-{ Token t; }
+{}
 {
-  (    "ns" t=< NAMESPACE > { jjtThis.jjtSetValue( t.image ); }
+  (    "ns" (Name())*
   |
-    "namespace" t=< NAMESPACE > { jjtThis.jjtSetValue( t.image ); }
+    "namespace" (Name())*
   )
 }
 
 void Use() :
-{ Token t; }
-{    "use" t=< USE > { jjtThis.jjtSetValue( t.image ); }
-}  
+{}
+{    "use" Name()
+}
 
-void Block() : {}
+void Name() :
+{}
+{
+  Id() ( LOOKAHEAD(2) "." Id() )*}
+
+void Block() :
+{}
 {
     (      Id() ["is" Id()("," Id() )*] "{"
       [Has() ";"]
@@ -188,23 +182,26 @@ void Block() : {}
     )
 }
 
-void Has() : {}
+void Has() :
+{}
 {
   "has" "{" "}"
 }
 
-void Actions() : {}
+void Actions() :
+{}
 {  "actions" "{" "}"
 }
 
-void Data() : {}
+void Data() :
+{}
 {
   "data" "{" "}"}
 
 void Statement() :
 {}
 {
-  Assignment() | Expression()}
+  Namespace() | Use() | Assignment() | Expression()}
 
 void Assignment() :
 { Token t; }

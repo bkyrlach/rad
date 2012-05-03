@@ -6,6 +6,9 @@ package net.ozias.rad.lang;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import net.ozias.rad.lang.eval.Namespace;
+import net.ozias.rad.lang.eval.Use;
+
 import org.apache.log4j.Logger;
 
 import org.testng.annotations.Test;
@@ -37,9 +40,9 @@ public class TestParser {
     final SimpleNode rootNode = Parser.parseFile( TestParser.class.getResourceAsStream( "test.rad" ) );
     assertTrue( rootNode instanceof ASTrad );
     final ASTrad rad = ( ASTrad ) rootNode;
-    assertEquals( ( ( ASTNamespace ) rad.jjtGetChild( 0 ) ).jjtGetValue(), "net.ozias.rad.lang" );
-    assertEquals( ( ( ASTUse ) rad.jjtGetChild( 1 ) ).jjtGetValue(), "java.util.List" );
-    assertEquals( ( ( ASTUse ) rad.jjtGetChild( 2 ) ).jjtGetValue(), "java.util.ArrayList" );
+    assertEquals( Namespace.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
+    assertEquals( Use.eval( ( SimpleNode ) rad.jjtGetChild( 1 ) ), "java.util.List" );
+    assertEquals( Use.eval( ( SimpleNode ) rad.jjtGetChild( 2 ) ), "java.util.ArrayList" );
     final ASTBlock block = ( ASTBlock ) rad.jjtGetChild( 3 );
     assertEquals( ( ( SimpleNode ) block.jjtGetChild( 0 ) ).jjtGetValue(), "Radical" );
     assertEquals( ( ( SimpleNode ) block.jjtGetChild( 1 ) ).jjtGetValue(), "EightiesSlangTerm" );
@@ -64,6 +67,6 @@ public class TestParser {
     final SimpleNode rootNode = Parser.parseFile( TestParser.class.getResourceAsStream( "test1.rad" ) );
     assertTrue( rootNode instanceof ASTrad );
     final ASTrad rad = ( ASTrad ) rootNode;
-    assertEquals( ( ( ASTNamespace ) rad.jjtGetChild( 0 ) ).jjtGetValue(), "net.ozias.rad.lang" );
+    assertEquals( Namespace.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
   }
 }

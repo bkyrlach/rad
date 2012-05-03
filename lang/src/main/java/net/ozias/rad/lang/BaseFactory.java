@@ -7,10 +7,12 @@ import static net.ozias.rad.lang.BaseMethodFlags.ADD_METHOD;
 import static net.ozias.rad.lang.BaseMethodFlags.DIV_METHOD;
 import static net.ozias.rad.lang.BaseMethodFlags.MOD_METHOD;
 import static net.ozias.rad.lang.BaseMethodFlags.MUL_METHOD;
+import static net.ozias.rad.lang.BaseMethodFlags.NS_METHOD;
 import static net.ozias.rad.lang.BaseMethodFlags.SUB_METHOD;
 
 import net.ozias.rad.RadClassLoader;
 import net.ozias.rad.lang.asm.ASMBase;
+import net.ozias.rad.lang.asm.adapter.AddNamespaceAdapter;
 import net.ozias.rad.lang.asm.adapter.AddOpsAdapter;
 
 import org.objectweb.asm.ClassReader;
@@ -55,14 +57,21 @@ public final class BaseFactory {
   /**
    * Add the given flag to the list of current flags.
    *
-   * @param  flag  The flag to add.
+   * @param   flag  The flag to add.
+   *
+   * @return  true if the flag was added, false otherwise.
    */
-  public static void addFlag( final String flag ) {
+  public static boolean addFlag( final String flag ) {
+    boolean retbool = false;
     final StringBuilder sb = new StringBuilder( flag.toUpperCase( Locale.US ) ).append( "_METHOD" );
+    final BaseMethodFlags bmflag = BaseMethodFlags.valueOf( sb.toString() );
 
-    if ( !currentFlags.contains( flag ) ) {
-      currentFlags.add( BaseMethodFlags.valueOf( sb.toString() ) );
+    if ( !currentFlags.contains( bmflag ) ) {
+      currentFlags.add( bmflag );
+      retbool = true;
     }
+
+    return retbool;
   }
 
   /**
@@ -89,13 +98,21 @@ public final class BaseFactory {
   /**
    * Remove a flag from the current flags.
    *
-   * @param  flag  The flag to remove.
+   * @param   flag  The flag to remove.
+   *
+   * @return  true if the flag was removed, false otherwise.
    */
-  public static void removeFlag( final BaseMethodFlags flag ) {
+  public static boolean removeFlag( final String flag ) {
+    boolean retbool = false;
+    final StringBuilder sb = new StringBuilder( flag.toUpperCase( Locale.US ) ).append( "_METHOD" );
+    final BaseMethodFlags bmflag = BaseMethodFlags.valueOf( sb.toString() );
 
-    if ( currentFlags.contains( flag ) ) {
-      currentFlags.remove( flag );
+    if ( currentFlags.contains( bmflag ) ) {
+      currentFlags.remove( bmflag );
+      retbool = true;
     }
+
+    return retbool;
   }
 
   /**
@@ -117,8 +134,11 @@ public final class BaseFactory {
         current = new AddOpsAdapter( current );
       }
 
-      cr.accept( current, 0 );
+      if ( currentFlags.contains( NS_METHOD ) ) {
+        current = new AddNamespaceAdapter( current );
+      }
 
+      cr.accept( current, 0 );
     }
 
     return cw.toByteArray();
