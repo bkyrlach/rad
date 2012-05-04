@@ -27,6 +27,8 @@ public class RadInvoker {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
+  /** Unable to access field string. */
+  private static final String UNABLE_TO_ACCESS_FIELD = "Unable to access field.";
   /** Error loading state string. */
   private static final String ERROR_LOADING_STATE = "Error loading state.";
   /** log4j Logger. */
@@ -38,7 +40,6 @@ public class RadInvoker {
   private final transient List<AbstractChainableAdapter> fieldAdapters = new ArrayList<AbstractChainableAdapter>();
   /** The map of R@d objects to their associated RadFactory. */
   private final transient RadFactory radFactory;
-
   /** The AddOpsAdapter. */
   private transient AddOpsAdapter addOpsAdapter = null;
   /** The current object. */
@@ -67,7 +68,7 @@ public class RadInvoker {
    *
    * @return  The result of the field being set.
    */
-  public Object addField( final String object, final String identifier, final String type, final Object value ) {
+  public Object addField( final String object, final String identifier, final Class<?> type, final Object value ) {
     Object retobj = null;
     boolean create = true;
 
@@ -78,9 +79,9 @@ public class RadInvoker {
         clazz.getDeclaredField( identifier );
         create = false;
       } catch ( final NoSuchFieldException e ) {
-        LOG.debug( "Unable to access field.", e );
+        LOG.debug( UNABLE_TO_ACCESS_FIELD, e );
       } catch ( final SecurityException e ) {
-        LOG.error( "Unable to access field.", e );
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
         create = false;
       }
     }
@@ -89,7 +90,7 @@ public class RadInvoker {
 
       if ( create ) {
         // Field doesn't exist, so create it.
-        final AddFieldAdapter addFieldAdapter = new AddFieldAdapter( object, identifier, type );
+        final AddFieldAdapter addFieldAdapter = new AddFieldAdapter( object, identifier, type.getName().replace( '.', '/' ) );
         fieldAdapters.add( addFieldAdapter );
         radFactory.addAdapter( addFieldAdapter );
         final Map<String, Object> fieldMap = saveState();
@@ -100,8 +101,8 @@ public class RadInvoker {
       final Method getCN = currentObject.getClass().getDeclaredMethod( ASMField.getter( identifier ), ( Class<?>[] ) null );
       retobj = getCN.invoke( currentObject, ( Object[] ) null );
 
-      if ( retobj == null ) {
-        final Method setCN = currentObject.getClass().getDeclaredMethod( ASMField.setter( identifier ), String.class );
+      if ( ( retobj == null ) || ( value != null ) ) {
+        final Method setCN = currentObject.getClass().getDeclaredMethod( ASMField.setter( identifier ), type );
         setCN.invoke( currentObject, value );
         retobj = value;
       }
@@ -168,6 +169,39 @@ public class RadInvoker {
     }
 
     return retnum;
+  }
+
+  /**
+   * Read a field in the current object.
+   *
+   * @param   identifier  The field identifier.
+   *
+   * @return  The current value of the field.
+   */
+  public Object readField( final String identifier ) {
+    Object retobj = null;
+
+    if ( currentObject != null ) {
+      final Class<?> clazz = currentObject.getClass();
+
+      try {
+        final Field field = clazz.getDeclaredField( identifier );
+        final boolean origAccessible = field.isAccessible();
+        field.setAccessible( true );
+        retobj = field.get( currentObject );
+        field.setAccessible( origAccessible );
+      } catch ( final NoSuchFieldException e ) {
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+      } catch ( final SecurityException e ) {
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+      } catch ( IllegalArgumentException e ) {
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+      } catch ( IllegalAccessException e ) {
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+      }
+    }
+
+    return retobj;
   }
 
   /**

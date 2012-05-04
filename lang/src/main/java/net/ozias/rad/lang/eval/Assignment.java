@@ -4,6 +4,7 @@
 package net.ozias.rad.lang.eval;
 
 import net.ozias.rad.lang.ASTAssignment;
+import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
@@ -13,6 +14,8 @@ public final class Assignment implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
+  /** Invoke parameter types. */
+  private static final Class<?>[] PARAMETER_TYPES = new Class<?>[] { String.class, String.class, Class.class, Object.class };
   /** Singleton Instance. */
   private static Assignment instance = null;
   /** Lock object. */
@@ -63,11 +66,12 @@ public final class Assignment implements Evaluatable {
   @Override public Number evaluate( final SimpleNode node ) {
 
     if ( node instanceof ASTAssignment ) {
-      // final String identifier = ( String ) node.jjtGetValue();
-      // final Number value =
-      Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+      final String identifier = ( String ) node.jjtGetValue();
+      final Number value = Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+      Invoker.invoke( Invoker.getCurrentBase(), "addField", PARAMETER_TYPES,
+        new Object[] { Invoker.getCurrentBase().replace( '.', '/' ), identifier, String.class, value.toString() } );
 
-      return -1;
+      return value;
     } else {
       throw new IllegalArgumentException( "Supplied node is not an ASTAssignment node" );
     }

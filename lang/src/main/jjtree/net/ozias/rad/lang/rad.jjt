@@ -54,7 +54,7 @@ SKIP : {
 }
 
 // Reserved Words
-TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is" | "add" | "sub" | "mul" | "div" | "mod"
+TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is" | "add" | "sub" | "mul" | "div" | "mod" | "echo"
 }
 
 TOKEN : { < OPEN_PAR : "(" > }
@@ -171,6 +171,11 @@ void Name() :
 {
   Id() ( LOOKAHEAD(2) "." Id() )*}
 
+void Echo() :
+{}
+{
+  "echo" Id()}
+
 void Block() :
 {}
 {
@@ -201,7 +206,7 @@ void Data() :
 void Statement() :
 {}
 {
-  Namespace() | Use() | Assignment() | Expression()}
+  Namespace() | Use() | Echo() | Assignment() | Expression()}
 
 void Assignment() :
 { Token t; }

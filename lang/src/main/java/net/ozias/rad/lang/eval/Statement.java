@@ -4,6 +4,7 @@
 package net.ozias.rad.lang.eval;
 
 import net.ozias.rad.lang.ASTAssignment;
+import net.ozias.rad.lang.ASTEcho;
 import net.ozias.rad.lang.ASTExpression;
 import net.ozias.rad.lang.ASTNamespace;
 import net.ozias.rad.lang.ASTStatement;
@@ -82,6 +83,8 @@ public final class Statement implements Evaluatable {
           retstr = Namespace.eval( child );
         } else if ( child instanceof ASTUse ) {
           retstr = Use.eval( child );
+        } else if ( child instanceof ASTEcho ) {
+          retstr = Echo.eval( child );
         } else {
           retstr = "Unknown statement!!";
         }

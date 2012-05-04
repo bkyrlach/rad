@@ -4,6 +4,7 @@
 package net.ozias.rad;
 
 import static net.ozias.rad.lang.asm.ASMConstants.BASE_CN;
+import static net.ozias.rad.lang.asm.ASMConstants.BASE_NS;
 
 import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.RadInvoker;
@@ -71,7 +72,7 @@ public class Bootstrap implements Runnable {
    */
   @Override public void run() {
     Invoker.addInvoker( BASE_CN, new RadInvoker( BASE_CN ) );
-    Invoker.setCurrentObjectName( BASE_CN );
+    Invoker.setCurrentNamespace( BASE_NS );
 
     addRunnable( new RadInterpreter() );
 

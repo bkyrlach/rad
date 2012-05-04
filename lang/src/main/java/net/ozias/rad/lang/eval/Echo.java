@@ -3,31 +3,28 @@
  */
 package net.ozias.rad.lang.eval;
 
-import static net.ozias.rad.lang.asm.ASMConstants.BASE_ASM_CN;
-
-import net.ozias.rad.lang.ASTNamespace;
+import net.ozias.rad.lang.ASTEcho;
 import net.ozias.rad.lang.Invoker;
-import net.ozias.rad.lang.RadInvoker;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
- * Evaluate an ASTNamespace node.
+ * Evaluates an ASTEcho node.
  */
-public final class Namespace implements Evaluatable {
+public final class Echo implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static Namespace instance = null;
+  private static Echo instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new Namespace object.
+   * Creates a new Echo object.
    */
-  private Namespace() {
+  private Echo() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -38,7 +35,7 @@ public final class Namespace implements Evaluatable {
    *
    * @param   node  The node to evaluate.
    *
-   * @return  The String result from evaluating the node.
+   * @return  The Number result from evaluating the node.
    */
   public static String eval( final SimpleNode node ) {
     return getInstance().evaluate( node );
@@ -49,12 +46,12 @@ public final class Namespace implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static Namespace getInstance() {
+  public static Echo getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new Namespace();
+        instance = new Echo();
       }
     }
 
@@ -65,25 +62,16 @@ public final class Namespace implements Evaluatable {
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public String evaluate( final SimpleNode node ) {
-    String retstr = null;
 
-    if ( node instanceof ASTNamespace ) {
+    if ( node instanceof ASTEcho ) {
+      String retstr = "";
+      final String identifier = ( String ) ( ( SimpleNode ) node.jjtGetChild( 0 ) ).jjtGetValue();
 
-      if ( node.jjtGetNumChildren() == 1 ) {
-        final String namespace = Name.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
-        final String object = new StringBuilder( namespace ).append( ".Base" ).toString();
-        Invoker.addInvoker( object, new RadInvoker( object ) );
-        Invoker.setCurrentNamespace( namespace );
-        retstr = namespace;
-      } else {
-        retstr = ( String ) Invoker.invoke( "addField", new Class<?>[] { String.class, String.class, Class.class, Object.class },
-            new Object[] { BASE_ASM_CN, "currentNamespace", String.class, Invoker.getCurrentNamespace() } );
-      }
+      retstr = ( String ) Invoker.invoke( Invoker.getCurrentBase(), "readField", new Class<?>[] { String.class }, new Object[] { identifier } );
+
+      return retstr;
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTNamespace node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTExpression node" );
     }
-
-    return retstr;
   }
-
 }
