@@ -50,6 +50,7 @@
   <jalopy.version>1.9.4-192</jalopy.version>
   <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
   <jaxws-maven-plugin.version>2.2</jaxws-maven-plugin.version>
+  <jline.version>2.6</jline.version>
   <maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
   <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
   <tomcat7-maven-plugin.version>2.0-beta-1</tomcat7-maven-plugin.version>
@@ -647,6 +648,11 @@
     <groupId>org.ow2.asm</groupId>
     <artifactId>asm-tree</artifactId>
     <version>${asm.version}</version>
+   </dependency>
+   <dependency>
+    <groupId>jline</groupId>
+    <artifactId>jline</artifactId>
+    <version>${jline.version}</version>
    </dependency>
   </dependencies>
  </dependencyManagement>
