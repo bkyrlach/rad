@@ -1,0 +1,32 @@
+ns net.ozias.rad.lang;
+
+use java.util.List;
+use java.util.ArrayList;
+
+Radical is EightiesSlangTerm {
+  actions {
+    //@init( "Radical" );
+  };
+};
+
+Righteous is EightiesSlangTerm {
+  actions {
+    //@init( "Righteous" );
+  };
+};
+
+Whassup is NinetiesSlangTerm {
+  actions {
+    //@init( "Whassup" );
+  };
+};
+
+EightiesSlangTerm is SlangTerm {};
+NinetiesSlangTerm is SlangTerm {};
+
+SlangTerm {
+  data {
+    //req str value;
+    //str alt;
+  };
+};

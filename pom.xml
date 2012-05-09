@@ -15,6 +15,7 @@
  </scm>
  <modules>
   <module>lang</module>
+  <module>lang-generated</module>
  </modules>
  <properties>
   <!-- Maven Property Adjustments -->
@@ -49,73 +50,27 @@
   <jalopy.version>1.9.4-192</jalopy.version>
   <javacc-maven-plugin.version>2.6</javacc-maven-plugin.version>
   <jaxws-maven-plugin.version>2.2</jaxws-maven-plugin.version>
+  <jline.version>2.6</jline.version>
   <maven-replacer-plugin.version>1.4.1</maven-replacer-plugin.version>
   <properties-maven-plugin.version>1.0-alpha-2</properties-maven-plugin.version>
   <tomcat7-maven-plugin.version>2.0-beta-1</tomcat7-maven-plugin.version>
   <wagon-ssh-external.version>2.2</wagon-ssh-external.version>
   <!-- Dependency Versions (Please modify the versions here for updates) -->
-  <!-- Apache Commons Dependency Versions -->
-  <!--
-  <commons-beanutils.version>1.8.3</commons-beanutils.version>
-  <commons-codec.version>1.5</commons-codec.version>
-  <commons-dbcp.version>1.4</commons-dbcp.version>
-  <commons-httpclient.version>3.1</commons-httpclient.version>
-  -->
+  <asm.version>4.0</asm.version>
   <commons-lang.version>3.1</commons-lang.version>
-  <!--
-  <commons-logging.version>1.1.1</commons-logging.version>
-  <commons-pool.version>1.5.6</commons-pool.version>
-  <commons-validator.version>1.4.0</commons-validator.version>
-  -->
-  <!-- Spring Versions -->
-  <!--
-  <spring.version>3.0.5.RELEASE</spring.version>
-  <spring.webflow.version>2.2.0.RELEASE</spring.webflow.version>
-  -->
-  <!-- Struts Version -->
-  <!--
-  <struts.version>1.3.0</struts.version>
-  -->
-  <!-- Tiles Version -->
-  <!--
-  <tiles.version>2.2.2</tiles.version>
-  -->
-  <!-- Support Libraries Versions -->
-  <!--
-  <aspectj.version>1.6.11</aspectj.version>
-  <displaytag.version>1.2</displaytag.version>
-  <javax.mail.version>1.4.4</javax.mail.version>
-  -->
+  <log4j.version>1.2.16</log4j.version>
   <javax.servlet.version>2.5</javax.servlet.version>
   <jaxws-rt.version>2.2.7-promoted-b22</jaxws-rt.version>
   <maven-doxia-tools.version>1.4</maven-doxia-tools.version>
-  <!--
-  <joda-time.version>2.0</joda-time.version>
-  <joda-time-jsptags.version>1.1.1</joda-time-jsptags.version>
-  <jsp-api.version>2.0</jsp-api.version>
-  -->
-  <log4j.version>1.2.16</log4j.version>
-  <!--
-  <lucene-core.version>3.1.0</lucene-core.version>
-  <mysql-connector-java.version>5.1.16</mysql-connector-java.version>
-  <slf4j.version>1.6.4</slf4j.version>
-  <stax-ex.version>1.7</stax-ex.version>
-  <swingx-core.version>1.6.3</swingx-core.version>
-  <taglibs.version>1.1.2</taglibs.version>
-  <xmlsec.version>1.3.0</xmlsec.version>
-  -->
-  <!-- Internal Dependency Versions (These should all be ${project.version} unless you you have a really good reason to hard code it) -->
-  <!--
-  <utilities.version>${project.version}</utilities.version>
-  -->
   <!-- Test Dependency Versions -->
-  <junit.version>4.10</junit.version>
-  <testng.version>6.5.2</testng.version>
   <hamcrest.version>1.2.1</hamcrest.version>
+  <junit.version>4.10</junit.version>
   <mockito.version>1.9.0</mockito.version>
-  <powermock.version>1.4.12</powermock.version>
   <mockobjects.version>0.09</mockobjects.version>
-  <ojdbc.version>10.2.0.5.0</ojdbc.version>
+  <powermock.version>1.4.12</powermock.version>
+  <testng.version>6.5.2</testng.version>
+  <!-- Internal Dependency Versions (These should all be ${project.version} unless you you have a really good reason to hard code it) -->
+  <utilities.version>${project.version}</utilities.version>
  </properties>
  <build>
   <pluginManagement>
@@ -134,7 +89,7 @@
      <artifactId>jalopy-maven</artifactId>
      <version>${jalopy.version}</version>
      <configuration>
-      <convention>http://www.ozias.net/em_jalopy_config.xml</convention>
+      <convention>http://www.ozias.net/jalopy_config.xml</convention>
       <failOnError>false</failOnError>
       <fork>true</fork>
       <encoding>${encoding}</encoding>
@@ -333,6 +288,7 @@
         <configuration>
          <aggregate>true</aggregate>
          <linkXRef>false</linkXRef>
+         <forkMode>never</forkMode>
         </configuration>
        </plugin>
       </reportPlugins>
@@ -583,7 +539,6 @@
  </build>
  <dependencyManagement>
   <dependencies>
-   <!-- Common Dependency Management -->
    <!-- Test Only Dependencies -->
    <dependency>
     <groupId>junit</groupId>
@@ -645,13 +600,7 @@
     <version>${mockobjects.version}</version>
     <scope>test</scope>
    </dependency>
-   <dependency>
-    <groupId>oracle</groupId>
-    <artifactId>ojdbc14</artifactId>
-    <version>${ojdbc.version}</version>
-    <scope>test</scope>
-   </dependency>
-   <!-- Common Dependencies -->
+   <!-- Compile Time Dependencies -->
    <dependency>
     <groupId>log4j</groupId>
     <artifactId>log4j</artifactId>
@@ -675,277 +624,36 @@
      </exclusion>
     </exclusions>
    </dependency>
-   <!--
-   <dependency>
-    <groupId>mysql</groupId>
-    <artifactId>mysql-connector-java</artifactId>
-    <version>${mysql-connector-java.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.lucene</groupId>
-    <artifactId>lucene-core</artifactId>
-    <version>${lucene-core.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.swinglabs</groupId>
-    <artifactId>swingx-core</artifactId>
-    <version>${swingx-core.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>commons-dbcp</groupId>
-    <artifactId>commons-dbcp</artifactId>
-    <version>${commons-dbcp.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>commons-pool</groupId>
-    <artifactId>commons-pool</artifactId>
-    <version>${commons-pool.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>commons-codec</groupId>
-    <artifactId>commons-codec</artifactId>
-    <version>${commons-codec.version}</version>
-   </dependency>
-   -->
    <dependency>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-lang3</artifactId>
     <version>${commons-lang.version}</version>
    </dependency>
-   <!--
    <dependency>
-    <groupId>commons-httpclient</groupId>
-    <artifactId>commons-httpclient</artifactId>
-    <version>${commons-httpclient.version}</version>
+    <groupId>org.ow2.asm</groupId>
+    <artifactId>asm</artifactId>
+    <version>${asm.version}</version>
    </dependency>
    <dependency>
-    <groupId>commons-beanutils</groupId>
-    <artifactId>commons-beanutils</artifactId>
-    <version>${commons-beanutils.version}</version>
+    <groupId>org.ow2.asm</groupId>
+    <artifactId>asm-util</artifactId>
+    <version>${asm.version}</version>
    </dependency>
    <dependency>
-    <groupId>commons-validator</groupId>
-    <artifactId>commons-validator</artifactId>
-    <version>${commons-validator.version}</version>
+    <groupId>org.ow2.asm</groupId>
+    <artifactId>asm-commons</artifactId>
+    <version>${asm.version}</version>
    </dependency>
    <dependency>
-    <groupId>commons-logging</groupId>
-    <artifactId>commons-logging</artifactId>
-    <version>${commons-logging.version}</version>
+    <groupId>org.ow2.asm</groupId>
+    <artifactId>asm-tree</artifactId>
+    <version>${asm.version}</version>
    </dependency>
    <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-aop</artifactId>
-    <version>${spring.version}</version>
+    <groupId>jline</groupId>
+    <artifactId>jline</artifactId>
+    <version>${jline.version}</version>
    </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-beans</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-context</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-core</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-web</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-webmvc</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-jdbc</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-core</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-config</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-core-tiger</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-ldap</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-taglibs</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-web</artifactId>
-    <version>${spring.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework</groupId>
-    <artifactId>spring-test</artifactId>
-    <version>${spring.version}</version>
-    <scope>compile</scope>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.webflow</groupId>
-    <artifactId>spring-webflow</artifactId>
-    <version>${spring.webflow.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.webflow</groupId>
-    <artifactId>spring-binding</artifactId>
-    <version>${spring.webflow.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.springframework.webflow</groupId>
-    <artifactId>spring-js</artifactId>
-    <version>${spring.webflow.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.aspectj</groupId>
-    <artifactId>aspectjrt</artifactId>
-    <version>${aspectj.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.aspectj</groupId>
-    <artifactId>aspectjweaver</artifactId>
-    <version>${aspectj.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>joda-time</groupId>
-    <artifactId>joda-time</artifactId>
-    <version>${joda-time.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>joda-time</groupId>
-    <artifactId>joda-time-jsptags</artifactId>
-    <version>${joda-time-jsptags.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>com.sun.xml.ws</groupId>
-    <artifactId>jaxws-rt</artifactId>
-    <version>${jaxws-rt.version}</version>
-    <exclusions>
-     <exclusion>
-      <groupId>org.jvnet.staxex</groupId>
-      <artifactId>stax-ex</artifactId>
-     </exclusion>
-    </exclusions>
-   </dependency>
-   <dependency>
-    <groupId>com.sun.xml.ws</groupId>
-    <artifactId>jaxws-tools</artifactId>
-    <version>${jaxws-rt.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.jvnet.staxex</groupId>
-    <artifactId>stax-ex</artifactId>
-    <version>${stax-ex.version}</version>
-    <exclusions>
-     <exclusion>
-      <artifactId>stax-api</artifactId>
-      <groupId>javax.xml.stream</groupId>
-     </exclusion>
-    </exclusions>
-   </dependency>
-   -->
-   <!-- Utilities Dependency Management -->
-   <!--
-   <dependency>
-    <groupId>oziasnet</groupId>
-    <artifactId>common-utilities</artifactId>
-    <version>${utilities.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>eyemed.csi</groupId>
-    <artifactId>shared-utilities</artifactId>
-    <version>${utilities.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>eyemed</groupId>
-    <artifactId>eyemed-core-utils</artifactId>
-    <version>${eyemed.core.utils.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>javax.servlet</groupId>
-    <artifactId>servlet-api</artifactId>
-    <version>${javax.servlet.version}</version>
-    <scope>provided</scope>
-   </dependency>
-   <dependency>
-    <groupId>javax.servlet.jsp</groupId>
-    <artifactId>jsp-api</artifactId>
-    <version>${jsp-api.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>javax.mail</groupId>
-    <artifactId>mail</artifactId>
-    <version>${javax.mail.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>taglibs</groupId>
-    <artifactId>standard</artifactId>
-    <version>${taglibs.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>xml-security</groupId>
-    <artifactId>xmlsec</artifactId>
-    <version>${xmlsec.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>displaytag</groupId>
-    <artifactId>displaytag</artifactId>
-    <version>${displaytag.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.struts</groupId>
-    <artifactId>struts-core</artifactId>
-    <version>${struts.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.struts</groupId>
-    <artifactId>struts-tiles</artifactId>
-    <version>${struts.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.tiles</groupId>
-    <artifactId>tiles-core</artifactId>
-    <version>${tiles.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.tiles</groupId>
-    <artifactId>tiles-api</artifactId>
-    <version>${tiles.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.apache.tiles</groupId>
-    <artifactId>tiles-jsp</artifactId>
-    <version>${tiles.version}</version>
-   </dependency>
-   <dependency>
-    <groupId>org.slf4j</groupId>
-    <artifactId>slf4j-log4j12</artifactId>
-    <version>${slf4j.version}</version>
-   </dependency>
-   -->
   </dependencies>
  </dependencyManagement>
  <profiles>

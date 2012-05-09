@@ -27,7 +27,7 @@
       <configuration>
        <transformers>
         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-         <mainClass>net.ozias.rad.lang.Parser</mainClass>
+         <mainClass>net.ozias.rad.Bootstrap</mainClass>
         </transformer>
        </transformers>
       </configuration>
@@ -85,6 +85,31 @@
    <groupId>org.apache.commons</groupId>
    <artifactId>commons-lang3</artifactId>
   </dependency>
+  <dependency>
+   <groupId>oziasnet</groupId>
+   <artifactId>common-utilities</artifactId>
+   <version>1.0-DEV-SNAPSHOT</version>
+  </dependency>
+  <dependency>
+   <groupId>org.ow2.asm</groupId>
+   <artifactId>asm</artifactId>
+  </dependency>
+  <dependency>
+   <groupId>org.ow2.asm</groupId>
+   <artifactId>asm-util</artifactId>
+  </dependency>
+  <dependency>
+   <groupId>org.ow2.asm</groupId>
+   <artifactId>asm-commons</artifactId>
+  </dependency>
+  <dependency>
+   <groupId>org.ow2.asm</groupId>
+   <artifactId>asm-tree</artifactId>
+  </dependency>
+  <dependency>
+   <groupId>jline</groupId>
+   <artifactId>jline</artifactId>
+  </dependency>
  </dependencies>
  
  <profiles>
@@ -135,8 +160,6 @@
        <arguments>
         <argument>--nobackup</argument>
         <argument>-r</argument>
-        <argument>-q</argument>
-        <argument>--log=./jalopy.log</argument>
         <argument>.</argument>
        </arguments>
       </configuration>
@@ -198,6 +221,9 @@
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-pmd-plugin</artifactId>
       <configuration>
+      <rulesets>
+       <ruleset>http://www.ozias.net/non_j2ee_pmd_ruleset.xml</ruleset>
+      </rulesets>
        <excludeRoots>
         <excludeRoot>${project.build.directory}/generated-sources/jjtree</excludeRoot>
         <excludeRoot>${project.build.directory}/generated-sources/javacc</excludeRoot>
