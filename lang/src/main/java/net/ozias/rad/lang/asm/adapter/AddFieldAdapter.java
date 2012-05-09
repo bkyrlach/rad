@@ -10,7 +10,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 /**
- * An ASM adapter used to add a field to an object.
+ * An ASM adapter used to add a field (plus getter/setter) to an object.
  */
 public class AddFieldAdapter extends AbstractChainableAdapter implements Opcodes {
 

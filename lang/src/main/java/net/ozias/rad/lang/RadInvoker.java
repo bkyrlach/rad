@@ -7,6 +7,7 @@ import net.ozias.rad.lang.asm.ASMField;
 import net.ozias.rad.lang.asm.adapter.AbstractChainableAdapter;
 import net.ozias.rad.lang.asm.adapter.AddFieldAdapter;
 import net.ozias.rad.lang.asm.adapter.AddOpsAdapter;
+import net.ozias.rad.lang.asm.adapter.RemoveFieldAdapter;
 
 import org.apache.log4j.Logger;
 
@@ -14,7 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -36,12 +37,12 @@ public class RadInvoker {
 
   //~ Instance fields ------------------------------------------------------------------------------------------------------------------------------------------
 
-  /** The field adapters that have been added to the factory chain. */
-  private final transient List<AbstractChainableAdapter> fieldAdapters = new ArrayList<AbstractChainableAdapter>();
+  /** The AddOpsAdapter. */
+  private final transient AddOpsAdapter addOpsAdapter = new AddOpsAdapter();
+  /** A map of field adapters. This is used mainly to remove adapters when field types are re-assigned. */
+  private final transient Map<String, AbstractChainableAdapter> fieldAdapters = new HashMap<String, AbstractChainableAdapter>();
   /** The map of R@d objects to their associated RadFactory. */
   private final transient RadFactory radFactory;
-  /** The AddOpsAdapter. */
-  private transient AddOpsAdapter addOpsAdapter = null;
   /** The current object. */
   private transient Object currentObject = null;
 
@@ -70,28 +71,13 @@ public class RadInvoker {
    */
   public Object addField( final String object, final String identifier, final Class<?> type, final Object value ) {
     Object retobj = null;
-    boolean create = true;
-
-    if ( currentObject != null ) {
-      final Class<?> clazz = currentObject.getClass();
-
-      try {
-        clazz.getDeclaredField( identifier );
-        create = false;
-      } catch ( final NoSuchFieldException e ) {
-        LOG.debug( UNABLE_TO_ACCESS_FIELD, e );
-      } catch ( final SecurityException e ) {
-        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
-        create = false;
-      }
-    }
 
     try {
 
-      if ( create ) {
-        // Field doesn't exist, so create it.
+      if ( hasField( identifier ) == null ) {
         final AddFieldAdapter addFieldAdapter = new AddFieldAdapter( object, identifier, type.getName().replace( '.', '/' ) );
-        fieldAdapters.add( addFieldAdapter );
+        fieldAdapters.remove( identifier );
+        fieldAdapters.put( identifier, addFieldAdapter );
         radFactory.addAdapter( addFieldAdapter );
         final Map<String, Object> fieldMap = saveState();
         currentObject = radFactory.newInstance();
@@ -120,7 +106,6 @@ public class RadInvoker {
 
     return retobj;
   }
-
   /**
    * Invoke the given operation on the given numbers.
    *
@@ -147,8 +132,7 @@ public class RadInvoker {
 
     try {
 
-      if ( addOpsAdapter == null ) {
-        addOpsAdapter = new AddOpsAdapter();
+      if ( !radFactory.contains( addOpsAdapter ) ) {
         radFactory.addAdapter( addOpsAdapter );
         final Map<String, Object> fieldMap = saveState();
         currentObject = radFactory.newInstance();
@@ -169,6 +153,32 @@ public class RadInvoker {
     }
 
     return retnum;
+  }
+
+  /**
+   * Does the current object already contain a field identified by the given identifier.
+   *
+   * @param   identifier  The identifier to check.
+   *
+   * @return  true if a field given by identifier exists, false otherwise.
+   */
+  public Class<?> hasField( final String identifier ) {
+    Class<?> retclass = null;
+
+    if ( currentObject != null ) {
+      final Class<?> clazz = currentObject.getClass();
+
+      try {
+        final Field field = clazz.getDeclaredField( identifier );
+        retclass = field.getType();
+      } catch ( final NoSuchFieldException e ) {
+        LOG.debug( UNABLE_TO_ACCESS_FIELD, e );
+      } catch ( final SecurityException e ) {
+        LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+      }
+    }
+
+    return retclass;
   }
 
   /**
@@ -202,6 +212,44 @@ public class RadInvoker {
     }
 
     return retobj;
+  }
+
+  /**
+   * Remove a field (plus getter/setter) from the given R@d object.
+   *
+   * @param   identifier  The field identifier.
+   * @param   type        object The object to add the field to.
+   *
+   * @return  The result of the field being set.
+   */
+  public Object removeField( final String identifier, final String type ) {
+    Boolean retbool = Boolean.FALSE;
+
+    try {
+
+      if ( hasField( identifier ) != null ) {
+        final RemoveFieldAdapter removeFieldAdapter = new RemoveFieldAdapter( identifier, type );
+        fieldAdapters.remove( identifier );
+        fieldAdapters.put( identifier, removeFieldAdapter );
+        radFactory.addAdapter( removeFieldAdapter );
+        final Map<String, Object> fieldMap = saveState();
+        currentObject = radFactory.newInstance();
+        loadState( fieldMap );
+        retbool = Boolean.TRUE;
+      }
+    } catch ( ClassNotFoundException e ) {
+      LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+    } catch ( NoSuchMethodException e ) {
+      LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+    } catch ( InstantiationException e ) {
+      LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+    } catch ( IllegalAccessException e ) {
+      LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+    } catch ( InvocationTargetException e ) {
+      LOG.error( UNABLE_TO_ACCESS_FIELD, e );
+    }
+
+    return retbool;
   }
 
   /**

@@ -57,12 +57,23 @@ public class RadFactory {
   public boolean addAdapter( final AbstractChainableAdapter adapter ) {
     boolean retbool = false;
 
-    if ( !adapters.contains( adapter ) ) {
+    if ( !contains( adapter ) ) {
       adapters.add( adapter );
       retbool = true;
     }
 
     return retbool;
+  }
+
+  /**
+   * Does this factory have the given adapter.
+   *
+   * @param   adapter  The adapter to check.
+   *
+   * @return  true if this factory contains the given adapter, false otherwise.
+   */
+  public boolean contains( final AbstractChainableAdapter adapter ) {
+    return adapters.contains( adapter );
   }
 
   /**
@@ -95,7 +106,7 @@ public class RadFactory {
   public boolean removeAdapter( final AbstractChainableAdapter adapter ) {
     boolean retbool = false;
 
-    if ( adapters.contains( adapter ) ) {
+    if ( contains( adapter ) ) {
       adapters.remove( adapter );
       retbool = true;
     }

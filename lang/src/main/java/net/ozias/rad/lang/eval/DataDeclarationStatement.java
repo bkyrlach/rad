@@ -92,6 +92,13 @@ public final class DataDeclarationStatement implements Evaluatable {
         sb.append( " is filterable" );
       }
 
+      final Class<?> fieldType = ( Class<?> ) Invoker.invoke( Invoker.getCurrentBase(), "hasField", new Class<?>[] { String.class },
+          new Object[] { identifier } );
+
+      if ( fieldType != null ) {
+        Invoker.invoke( Invoker.getCurrentBase(), "removeField", new Class<?>[] { String.class, String.class },
+          new Object[] { identifier, fieldType.getName() } );
+      }
       Invoker.invoke( Invoker.getCurrentBase(), "addField", PARAMETER_TYPES,
         new Object[] { Invoker.getCurrentBase().replace( '.', '/' ), identifier, typeObject.getClass(), null } );
     } else {

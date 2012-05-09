@@ -281,12 +281,12 @@ void DataDeclarationStatement() :
 void DataType() :
 { Token t; }{
   (
-  t=< STRING > ( < LPAREN > Integer() < RPAREN > )?
-| t=< BIT > ( < LPAREN > Integer() < RPAREN > )?
-| t=< INTEGER >
-| t=< DECIMAL > ( < LPAREN > Integer() < COMMA > Integer() < RPAREN >)?
-| t=< FLOAT >
-| t=< DOUBLE >
+    t=< STRING > ( < LPAREN > Integer() < RPAREN > )?
+  | t=< BIT > ( < LPAREN > Integer() < RPAREN > )?
+  | t=< INTEGER >
+  | t=< DECIMAL > ( < LPAREN > Integer() (< COMMA > Integer())? < RPAREN >)?
+  | t=< FLOAT >
+  | t=< DOUBLE >
   )
 { jjtThis.jjtSetValue( t.image ); }}
 
@@ -313,13 +313,13 @@ void ActionStatement() :
 {
   < ACTION >
   (
-  EchoAction()
-| ReadAction()
-| FetchAction()
-| WriteAction()
-| PersistAction()
-| UserAction()
-)
+    EchoAction()
+  | ReadAction()
+  | FetchAction()
+  | WriteAction()
+  | PersistAction()
+  | UserAction()
+  )
 }
 
 void EchoAction() :

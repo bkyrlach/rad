@@ -5,6 +5,7 @@ package net.ozias.rad.lang.eval;
 
 import net.ozias.rad.lang.ASTDataType;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.datatype.RadString;
 
 /**
  * Evaluate an ASTDataType node.
@@ -13,6 +14,8 @@ public final class DataType implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
+  /** The default string length. */
+  private static final int DEFAULT_STR_LENGTH = 255;
   /** Singleton Instance. */
   private static DataType instance = null;
   /** Lock object. */
@@ -66,14 +69,14 @@ public final class DataType implements Evaluatable {
     if ( node instanceof ASTDataType ) {
       final String type = node.jjtGetValue().toString();
       final int count = node.jjtGetNumChildren();
-      Number size = 1;
+      Number size = 0;
 
       if ( count == 1 ) {
         size = ( Number ) ( ( SimpleNode ) node.jjtGetChild( 0 ) ).jjtGetValue();
       }
 
       if ( "str".equals( type ) ) {
-        retobj = new StringBuilder( size.intValue() );
+        retobj = new RadString( ( size.intValue() == 0 ) ? DEFAULT_STR_LENGTH : size.intValue(), "" );
       } else if ( "bit".equals( type ) ) {
         retobj = new byte[size.intValue()];
       } else if ( "int".equals( type ) ) {
