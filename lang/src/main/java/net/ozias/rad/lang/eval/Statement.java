@@ -4,6 +4,7 @@
 package net.ozias.rad.lang.eval;
 
 import net.ozias.rad.lang.ASTAssignmentFragment;
+import net.ozias.rad.lang.ASTDataDeclarationStatement;
 import net.ozias.rad.lang.ASTExpression;
 import net.ozias.rad.lang.ASTIdentifier;
 import net.ozias.rad.lang.ASTLoadFragment;
@@ -96,6 +97,8 @@ public final class Statement implements Evaluatable {
       retstr = NamespaceStatement.eval( child );
     } else if ( child instanceof ASTUseStatement ) {
       retstr = UseStatement.eval( child );
+    } else if ( child instanceof ASTDataDeclarationStatement ) {
+      retstr = DataDeclarationStatement.eval( child );
     } else if ( child instanceof ASTExpression ) {
       retstr = Expression.eval( child ).toString();
     } else if ( child instanceof ASTIdentifier ) {

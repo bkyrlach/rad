@@ -256,6 +256,7 @@ void Statement() :
 {
   NamespaceStatement()
 | UseStatement()
+| DataDeclarationStatement()
 | Expression()
 | Identifier() (AssignmentFragment() | LoadFragment())
 }
@@ -275,21 +276,24 @@ void UseStatement() :
 void DataDeclarationStatement() :
 {}
 {
- (< FILTER >)? DataType() Identifier() (< FROM > Identifier())?}
+ (Filter())? DataType() Identifier() (< FROM > Identifier())?}
 
 void DataType() :
-{}{
-  < STRING > ( < RPAREN > Integer() < LPAREN > )?
-| < BIT > ( < RPAREN > Integer() < LPAREN > )?
-| < INTEGER >
-| < DECIMAL > ( < RPAREN > Integer() < COMMA > Integer() < LPAREN >)?
-| < FLOAT >
-| < DOUBLE >}
+{ Token t; }{
+  (
+  t=< STRING > ( < LPAREN > Integer() < RPAREN > )?
+| t=< BIT > ( < LPAREN > Integer() < RPAREN > )?
+| t=< INTEGER >
+| t=< DECIMAL > ( < LPAREN > Integer() < COMMA > Integer() < RPAREN >)?
+| t=< FLOAT >
+| t=< DOUBLE >
+  )
+{ jjtThis.jjtSetValue( t.image ); }}
 
 void AssignmentFragment() :
 {}
 {
-  < ASSIGN > Expression()
+  < ASSIGN > ( Expression() | StringLiteral() )
 }
 
 void LoadFragment() :
@@ -427,6 +431,12 @@ void FloatingPoint() #FloatingPoint :
   t=< FLOATING_POINT_LITERAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
 }
 
+void StringLiteral() #StringLiteral :
+{ Token t; }
+{
+  t=< STRING_LITERAL >
+  { jjtThis.jjtSetValue( t.image );}}
+
 void OpFunction() :
 { Token t; }
 {
@@ -504,5 +514,12 @@ void Identifier() #Identifier :
 { Token t; }
 {
   t=< IDENTIFIER >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Filter() #Filter :
+{ Token t; }
+{
+  t=< FILTER >
   { jjtThis.jjtSetValue( t.image ); }
 }

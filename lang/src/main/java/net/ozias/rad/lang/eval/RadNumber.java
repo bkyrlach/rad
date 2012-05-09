@@ -63,7 +63,7 @@ public final class RadNumber implements Evaluatable {
   @Override public Number evaluate( final SimpleNode node ) {
 
     if ( node instanceof ASTNumber ) {
-      return ( Number ) ( ( ASTNumber ) node ).jjtGetValue();
+      return ( Number ) ( ( SimpleNode ) node.jjtGetChild( 0 ) ).jjtGetValue();
     } else {
       throw new IllegalArgumentException( "Supplied node is not an ASTNumber node." );
     }
