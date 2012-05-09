@@ -47,7 +47,13 @@ public class RadInterpreter implements Runnable {
 
           break;
         } else {
-          con.println( Statement.eval( Parser.parseStatement( token ) ) );
+          final String eval = Statement.eval( Parser.parseStatement( token ) );
+
+          if ( eval == null ) {
+            con.println( "Unable to evaluate the statement." );
+          } else {
+            con.println( eval );
+          }
         }
         con.flush();
         token = con.readLine();

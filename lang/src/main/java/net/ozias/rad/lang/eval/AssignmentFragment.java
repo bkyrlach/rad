@@ -3,21 +3,21 @@
  */
 package net.ozias.rad.lang.eval;
 
-import net.ozias.rad.lang.ASTAssignment;
+import net.ozias.rad.lang.ASTAssignmentFragment;
 import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
- * Evaluates an ASTAssignment node.
+ * Evaluates an ASTAssignmentFragment node.
  */
-public final class Assignment implements Evaluatable {
+public final class AssignmentFragment implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Invoke parameter types. */
   private static final Class<?>[] PARAMETER_TYPES = new Class<?>[] { String.class, String.class, Class.class, Object.class };
   /** Singleton Instance. */
-  private static Assignment instance = null;
+  private static AssignmentFragment instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
@@ -26,7 +26,7 @@ public final class Assignment implements Evaluatable {
   /**
    * Creates a new Expression object.
    */
-  private Assignment() {
+  private AssignmentFragment() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -48,12 +48,12 @@ public final class Assignment implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static Assignment getInstance() {
+  public static AssignmentFragment getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new Assignment();
+        instance = new AssignmentFragment();
       }
     }
 
@@ -61,17 +61,23 @@ public final class Assignment implements Evaluatable {
   }
 
   /**
+   * Invoke addField on the current base with the given identifier and default value.
+   *
+   * @param  identifier  The identifier to add to the current base object.
+   * @param  value       The default value of the identifier.
+   */
+  public static void invoke( final String identifier, final Object value ) {
+    Invoker.invoke( Invoker.getCurrentBase(), "addField", PARAMETER_TYPES,
+      new Object[] { Invoker.getCurrentBase().replace( '.', '/' ), identifier, String.class, value.toString() } );
+  }
+
+  /**
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public Number evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTAssignment ) {
-      final String identifier = ( String ) node.jjtGetValue();
-      final Number value = Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
-      Invoker.invoke( Invoker.getCurrentBase(), "addField", PARAMETER_TYPES,
-        new Object[] { Invoker.getCurrentBase().replace( '.', '/' ), identifier, String.class, value.toString() } );
-
-      return value;
+    if ( node instanceof ASTAssignmentFragment ) {
+      return Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
     } else {
       throw new IllegalArgumentException( "Supplied node is not an ASTAssignment node" );
     }

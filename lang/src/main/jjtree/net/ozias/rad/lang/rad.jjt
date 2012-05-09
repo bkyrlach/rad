@@ -21,12 +21,12 @@ public class Parser {
   
   public static SimpleNode parseFile( final InputStream stream ) throws FileNotFoundException, ParseException, TokenMgrError {
     final Parser parser = new Parser( stream );
-    parser.rad();
+    parser.Rad();
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
   
   public static SimpleNode parseFile( final File file ) throws FileNotFoundException, ParseException, TokenMgrError {    final Parser parser = new Parser( new FileReader( file ) );
-    parser.rad();
+    parser.Rad();
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
 
@@ -48,33 +48,129 @@ public class Parser {
 
 PARSER_END(Parser)
 
-// Whitespace, Comment
-SKIP : {
-  " " |  "\n" | "\r" | "\r\n" | <"//" (~["\n","\r"])* ("\n"|"\r")>
+SKIP : /* WHITE SPACE */
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+| "\f"
 }
 
-// Reserved Words
-TOKEN :{  "ns" | "namespace" | "use" | "has" | "actions" | "data" | "is" | "add" | "sub" | "mul" | "div" | "mod" | "echo"
+SPECIAL_TOKEN : /* COMMENTS */
+{
+  <SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+| <FORMAL_COMMENT: "/**" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
+| <MULTI_LINE_COMMENT: "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/">
 }
 
-TOKEN : { < OPEN_PAR : "(" > }
-TOKEN : { < CLOSE_PAR : ")" > }
-TOKEN : { < PLUS : "+" > }
-TOKEN : { < MINUS : "-" > }
-TOKEN : { < MULT : "*" > }
-TOKEN : { < DIV : "/" > }
-TOKEN : { < MOD : "%" > }
-
-// Numbers
-TOKEN : {
-  < INTEGER: < DIGIT > (< DIGIT >)* >
-| < DECIMAL: (< DIGIT >)+ "." (< DIGIT >)* > 
-| < #DIGIT: ["0"-"9"] >
+TOKEN : /* RESERVED WORDS AND LITERALS */{
+  < ACTIONS_RW: "actions" >
+| < ADD_RW: "add" >
+| < BIT: "bit" >
+| < DATA: "data" >
+| < DECIMAL: "dec" >
+| < DIV: "div" >
+| < DOUBLE: "double" >
+| < ECHO: "echo" >
+| < FETCH: "fetch" >
+| < FLOAT: "float" >
+| < FILTER: "filter" >
+| < FROM: "from" >
+| < HAS: "has" >
+| < INTEGER: "int" >| < IS: "is" >
+| < MOD: "mod" >
+| < MUL: "mul" >
+| < NAMESPACE: "namespace" >
+| < NS: "ns" >
+| < PERSIST: "persist" >
+| < READ: "read" >
+| < STRING: "str" >
+| < SUB: "sub" >
+| < USE: "use" >
+| < WRITE: "write" >
 }
+
+TOKEN : /* LITERALS */
+{
+  < INTEGER_LITERAL:
+        <DECIMAL_LITERAL> (["l","L"])?
+      | <HEX_LITERAL> (["l","L"])?
+      | <OCTAL_LITERAL> (["l","L"])?
+  >
+|
+  < #DECIMAL_LITERAL: ["1"-"9"] (["0"-"9"])* >
+|
+  < #HEX_LITERAL: "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+|
+  < #OCTAL_LITERAL: "0" (["0"-"7"])* >
+|
+  < FLOATING_POINT_LITERAL:
+        (["0"-"9"])+ "." (["0"-"9"])* (<EXPONENT>)? (["f","F","d","D"])?
+      | "." (["0"-"9"])+ (<EXPONENT>)? (["f","F","d","D"])?
+      | (["0"-"9"])+ <EXPONENT> (["f","F","d","D"])?
+      | (["0"-"9"])+ (<EXPONENT>)? ["f","F","d","D"]
+  >
+|
+  < #EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+ >
+|
+  < CHARACTER_LITERAL:
+      "'"
+      (   (~["'","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )
+      "'"
+  >
+|
+  < STRING_LITERAL:
+      "\""
+      (   (~["\"","\\","\n","\r"])
+        | ("\\"
+            ( ["n","t","b","r","f","\\","'","\""]
+            | ["0"-"7"] ( ["0"-"7"] )?
+            | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+            )
+          )
+      )*
+      "\""
+  >
+}
+
+TOKEN : /* SEPARATORS */
+{
+  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+| < COMMA: "," >
+| < DOT: "." >
+}
+
+TOKEN : /* OPERATORS */
+{
+  < ACTION : "@" >
+| < ASSIGN : "=" >
+| < CHAIN : "|" >
+| < DECREMENT : "--" >
+| < DIVIDE : "/" >
+| < INCREMENT : "++" >
+| < LOAD : "=>" >
+| < MINUS : "-" >
+| < MODULUS : "%" >
+| < MULTIPLY : "*" >
+| < PLUS : "+" >}
 
 // Identifiers
 TOKEN: {
-  < ID: < LETTER > ( < LETTER >|< IDDIGIT >|"_")* >
+  < IDENTIFIER: < LETTER > ( < LETTER >|< DIGIT >|"_")* >
 |
   < #LETTER: [
     "\u0041"-"\u005a", "\u0061"-"\u007a", "\u00aa"-"\u00aa", "\u00b5"-"\u00b5", "\u00ba"-"\u00ba",
@@ -135,7 +231,7 @@ TOKEN: {
     "\uffda"-"\uffdc"
   ] >
 |
-  < #IDDIGIT: [
+  < #DIGIT: [
     "\u0030"-"\u0039", "\u0660"-"\u0669", "\u06f0"-"\u06f9", "\u0966"-"\u096f", "\u09e6"-"\u09ef",
     "\u0a66"-"\u0a6f", "\u0ae6"-"\u0aef", "\u0b66"-"\u0b6f", "\u0be7"-"\u0bef", "\u0c66"-"\u0c6f",
     "\u0ce6"-"\u0cef", "\u0d66"-"\u0d6f", "\u0e50"-"\u0e59", "\u0ed0"-"\u0ed9", "\u0f20"-"\u0f29",
@@ -144,42 +240,129 @@ TOKEN: {
   ] >
 }
 
-void rad() : {}
+/*****************************************
+ * THE RAD LANGUAGE GRAMMAR STARTS HERE *
+ *****************************************/
+void Rad() : {}
 {
-    [Namespace() ";"]
-    [(Use() ";" )+]
+    [NamespaceStatement() ";"]
+    [(UseStatement() ";" )+]
     (Block() ";" )+
     <EOF>
 }
 
-void Namespace() :
+void Statement() :
 {}
 {
-  (    "ns" (Name())*
-  |
-    "namespace" (Name())*
-  )
+  NamespaceStatement()
+| UseStatement()
+| Expression()
+| Identifier() (AssignmentFragment() | LoadFragment())
 }
 
-void Use() :
+void NamespaceStatement() :
 {}
-{    "use" Name()
+{  < NS > (Name())*
+|
+  < NAMESPACE > (Name())*
 }
 
-void Name() :
+void UseStatement() :
 {}
-{
-  Id() ( LOOKAHEAD(2) "." Id() )*}
+{ < USE > Name()
+}
 
-void Echo() :
+void DataDeclarationStatement() :
 {}
 {
-  "echo" Id()}
+ (< FILTER >)? DataType() Identifier() (< FROM > Identifier())?}
+
+void DataType() :
+{}{
+  < STRING > ( < RPAREN > Integer() < LPAREN > )?
+| < BIT > ( < RPAREN > Integer() < LPAREN > )?
+| < INTEGER >
+| < DECIMAL > ( < RPAREN > Integer() < COMMA > Integer() < LPAREN >)?
+| < FLOAT >
+| < DOUBLE >}
+
+void AssignmentFragment() :
+{}
+{
+  < ASSIGN > Expression()
+}
+
+void LoadFragment() :
+{}
+{
+  < LOAD > ActionChain()
+}
+
+void ActionChain() :
+{}
+{
+  ActionStatement() ( < CHAIN > ActionStatement() )*
+}
+
+void ActionStatement() :
+{}
+{
+  < ACTION >
+  (
+  EchoAction()
+| ReadAction()
+| FetchAction()
+| WriteAction()
+| PersistAction()
+| UserAction()
+)
+}
+
+void EchoAction() :
+{ Token t; }
+{
+  t=< ECHO >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void ReadAction() :
+{ Token t; }
+{
+  t=< READ >
+  { jjtThis.jjtSetValue( t.image ); }}
+
+void FetchAction() :
+{ Token t; }
+{
+  t=< FETCH >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void WriteAction() :
+{ Token t; }
+{
+  t=< WRITE >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void PersistAction() :
+{ Token t; }
+{
+  t=< PERSIST >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void UserAction() :
+{ Token t; }
+{
+  t=< IDENTIFIER >
+  { jjtThis.jjtSetValue( t.image ); }
+}
 
 void Block() :
 {}
 {
-    (      Id() ["is" Id()("," Id() )*] "{"
+    (      Identifier() ["is" Identifier()("," Identifier() )*] "{"
       [Has() ";"]
       [Actions() ";"]
       [Data() ";"]
@@ -203,17 +386,6 @@ void Data() :
 {
   "data" "{" "}"}
 
-void Statement() :
-{}
-{
-  Namespace() | Use() | Echo() | Assignment() | Expression()}
-
-void Assignment() :
-{ Token t; }
-{
-  t=< ID > "=" Expression()
-  { jjtThis.jjtSetValue( t.image ); }}
-
 void Expression() :
 {}
 {
@@ -232,42 +404,68 @@ void Primary() :
   (
     Number()
   | OpFunction()
-  | < OPEN_PAR > Expression() < CLOSE_PAR >
-  | NegativePrimary()
+  | < LPAREN > Expression() < RPAREN >
+  | Negate()
   )
 }
 
 void Number() #Number :
 { Token t; }
 {
-  (
-    t=< INTEGER > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }
-  |
-    t=< DECIMAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
-  ) 
+  Integer()
+|
+  FloatingPoint()
+}
+
+void Integer() #Integer :
+{ Token t; }{
+  t=< INTEGER_LITERAL > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }}
+
+void FloatingPoint() #FloatingPoint :
+{ Token t; }
+{
+  t=< FLOATING_POINT_LITERAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
 }
 
 void OpFunction() :
 { Token t; }
 {
   (
-  t="add" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
+  t="add" < LPAREN > Primary() ("," Primary())+ < RPAREN >
   |
-  t="sub" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
+  t="sub" < LPAREN > Primary() ("," Primary())+ < RPAREN >
   |
-  t="mul" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
+  t="mul" < LPAREN > Primary() ("," Primary())+ < RPAREN >
   |
-  t="div" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR >
+  t="div" < LPAREN > Primary() ("," Primary())+ < RPAREN >
   |
-  t="mod" < OPEN_PAR > Primary() ("," Primary())+ < CLOSE_PAR > 
+  t="mod" < LPAREN > Primary() ("," Primary())+ < RPAREN > 
   )
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void NegativePrimary()  :
+void Negate()  :
 {}
 {
   < MINUS > Primary()}
+
+void Name() :
+{}
+{
+  Identifier() ( LOOKAHEAD(2) "." Identifier() )*
+}
+
+void Action() #Action :
+{ Token t; }{
+  t=< ACTION >
+  { jjtThis.jjtSetValue( t.image ); }}
+
+void Assign() #Assign :
+{ Token t; }
+{
+  t=< ASSIGN >
+  { jjtThis.jjtSetValue( t.image ); }
+}
 
 void Plus() #Plus :
 { Token t; }
@@ -284,27 +482,27 @@ void Minus() #Minus :
 void Mult() #Mult :
 { Token t; }
 {
-  t=< MULT >
+  t=< MULTIPLY >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
 void Div() #Div :
 { Token t; }
 {
-  t=< DIV >
+  t=< DIVIDE >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
 void Mod() #Mod :
 { Token t; }
 {
-  t=< MOD >
+  t=< MODULUS >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Id() #Id :
+void Identifier() #Identifier :
 { Token t; }
 {
-  t=< ID >
+  t=< IDENTIFIER >
   { jjtThis.jjtSetValue( t.image ); }
 }

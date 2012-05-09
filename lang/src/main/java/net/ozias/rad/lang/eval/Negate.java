@@ -3,27 +3,27 @@
  */
 package net.ozias.rad.lang.eval;
 
-import net.ozias.rad.lang.ASTNegativePrimary;
+import net.ozias.rad.lang.ASTNegate;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
- * Evaluate an ASTNegativePrimary node.
+ * Evaluate an ASTNegate node.
  */
-public final class NegativePrimary implements Evaluatable {
+public final class Negate implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static NegativePrimary instance = null;
+  private static Negate instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new NegativePrimary object.
+   * Creates a new Negate object.
    */
-  private NegativePrimary() {
+  private Negate() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -45,12 +45,12 @@ public final class NegativePrimary implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static NegativePrimary getInstance() {
+  public static Negate getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new NegativePrimary();
+        instance = new Negate();
       }
     }
 
@@ -62,7 +62,7 @@ public final class NegativePrimary implements Evaluatable {
    */
   @Override public Number evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTNegativePrimary ) {
+    if ( node instanceof ASTNegate ) {
       Number retnum = Primary.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
 
       if ( retnum instanceof Double ) {

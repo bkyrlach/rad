@@ -3,12 +3,13 @@
  */
 package net.ozias.rad.lang.eval;
 
-import net.ozias.rad.lang.ASTAssignment;
-import net.ozias.rad.lang.ASTEcho;
+import net.ozias.rad.lang.ASTAssignmentFragment;
 import net.ozias.rad.lang.ASTExpression;
-import net.ozias.rad.lang.ASTNamespace;
+import net.ozias.rad.lang.ASTIdentifier;
+import net.ozias.rad.lang.ASTLoadFragment;
+import net.ozias.rad.lang.ASTNamespaceStatement;
 import net.ozias.rad.lang.ASTStatement;
-import net.ozias.rad.lang.ASTUse;
+import net.ozias.rad.lang.ASTUseStatement;
 import net.ozias.rad.lang.SimpleNode;
 
 /**
@@ -66,30 +67,52 @@ public final class Statement implements Evaluatable {
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public String evaluate( final SimpleNode node ) {
-    String retstr = null;
+    String retstr = "Unknown statement!!";
 
     if ( node == null ) {
       retstr = "Parse failed, check logs.";
+    } else if ( node instanceof ASTStatement ) {
+      retstr = evaluateASTStatementNode( node );
     } else {
+      throw new IllegalArgumentException( "Supplied node is not an ASTStatement node." );
+    }
 
-      if ( node instanceof ASTStatement ) {
-        final SimpleNode child = ( SimpleNode ) node.jjtGetChild( 0 );
+    return retstr;
+  }
 
-        if ( child instanceof ASTExpression ) {
-          retstr = Expression.eval( child ).toString();
-        } else if ( child instanceof ASTAssignment ) {
-          retstr = Assignment.eval( child ).toString();
-        } else if ( child instanceof ASTNamespace ) {
-          retstr = Namespace.eval( child );
-        } else if ( child instanceof ASTUse ) {
-          retstr = Use.eval( child );
-        } else if ( child instanceof ASTEcho ) {
-          retstr = Echo.eval( child );
-        } else {
-          retstr = "Unknown statement!!";
+  /**
+   * Evaluate the given ASTStatementNode.
+   *
+   * @param   node  The ASTStatementNode to evaluate.
+   *
+   * @return  The evaluated value.
+   */
+  private String evaluateASTStatementNode( final SimpleNode node ) {
+    String retstr = "";
+    final int count = node.jjtGetNumChildren();
+    final SimpleNode child = ( SimpleNode ) node.jjtGetChild( 0 );
+
+    if ( child instanceof ASTNamespaceStatement ) {
+      retstr = NamespaceStatement.eval( child );
+    } else if ( child instanceof ASTUseStatement ) {
+      retstr = UseStatement.eval( child );
+    } else if ( child instanceof ASTExpression ) {
+      retstr = Expression.eval( child ).toString();
+    } else if ( child instanceof ASTIdentifier ) {
+      final String identifier = ( String ) child.jjtGetValue();
+
+      if ( count == 1 ) {
+        retstr = "Identifier encountered.";
+      } else if ( count == 2 ) {
+        final SimpleNode next = ( SimpleNode ) node.jjtGetChild( 1 );
+
+        if ( next instanceof ASTAssignmentFragment ) {
+          final Number value = AssignmentFragment.eval( next );
+          AssignmentFragment.invoke( identifier, value );
+          retstr = "Assignment successful.";
+        } else if ( next instanceof ASTLoadFragment ) {
+          retstr = "Load encountered.";
         }
-      } else {
-        throw new IllegalArgumentException( "Supplied node is not an ASTStatement node." );
       }
     }
 

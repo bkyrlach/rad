@@ -4,7 +4,7 @@
 package net.ozias.rad.lang.eval;
 
 import net.ozias.rad.lang.ASTExpression;
-import net.ozias.rad.lang.ASTNegativePrimary;
+import net.ozias.rad.lang.ASTNegate;
 import net.ozias.rad.lang.ASTNumber;
 import net.ozias.rad.lang.ASTOpFunction;
 import net.ozias.rad.lang.ASTPrimary;
@@ -72,8 +72,8 @@ public final class Primary implements Evaluatable {
 
       if ( childNode instanceof ASTNumber ) {
         retnum = RadNumber.eval( childNode );
-      } else if ( childNode instanceof ASTNegativePrimary ) {
-        retnum = NegativePrimary.eval( childNode );
+      } else if ( childNode instanceof ASTNegate ) {
+        retnum = Negate.eval( childNode );
       } else if ( childNode instanceof ASTOpFunction ) {
         retnum = OpFunction.eval( childNode );
       } else if ( childNode instanceof ASTExpression ) {

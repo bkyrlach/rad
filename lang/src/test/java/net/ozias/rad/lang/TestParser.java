@@ -6,8 +6,8 @@ package net.ozias.rad.lang;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import net.ozias.rad.lang.eval.Namespace;
-import net.ozias.rad.lang.eval.Use;
+import net.ozias.rad.lang.eval.NamespaceStatement;
+import net.ozias.rad.lang.eval.UseStatement;
 
 import org.apache.log4j.Logger;
 
@@ -38,11 +38,11 @@ public class TestParser {
   @Test public void testParser_test() throws ParseException, TokenMgrError, FileNotFoundException {
     LOG.info( "Parsing test.rad" );
     final SimpleNode rootNode = Parser.parseFile( TestParser.class.getResourceAsStream( "test.rad" ) );
-    assertTrue( rootNode instanceof ASTrad );
-    final ASTrad rad = ( ASTrad ) rootNode;
-    assertEquals( Namespace.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
-    assertEquals( Use.eval( ( SimpleNode ) rad.jjtGetChild( 1 ) ), "java.util.List" );
-    assertEquals( Use.eval( ( SimpleNode ) rad.jjtGetChild( 2 ) ), "java.util.ArrayList" );
+    assertTrue( rootNode instanceof ASTRad );
+    final ASTRad rad = ( ASTRad ) rootNode;
+    assertEquals( NamespaceStatement.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
+    assertEquals( UseStatement.eval( ( SimpleNode ) rad.jjtGetChild( 1 ) ), "java.util.List" );
+    assertEquals( UseStatement.eval( ( SimpleNode ) rad.jjtGetChild( 2 ) ), "java.util.ArrayList" );
     final ASTBlock block = ( ASTBlock ) rad.jjtGetChild( 3 );
     assertEquals( ( ( SimpleNode ) block.jjtGetChild( 0 ) ).jjtGetValue(), "Radical" );
     assertEquals( ( ( SimpleNode ) block.jjtGetChild( 1 ) ).jjtGetValue(), "EightiesSlangTerm" );
@@ -65,8 +65,8 @@ public class TestParser {
   public void testParser_test1() throws FileNotFoundException, ParseException, TokenMgrError {
     LOG.info( "Parsing test1.rad" );
     final SimpleNode rootNode = Parser.parseFile( TestParser.class.getResourceAsStream( "test1.rad" ) );
-    assertTrue( rootNode instanceof ASTrad );
-    final ASTrad rad = ( ASTrad ) rootNode;
-    assertEquals( Namespace.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
+    assertTrue( rootNode instanceof ASTRad );
+    final ASTRad rad = ( ASTRad ) rootNode;
+    assertEquals( NamespaceStatement.eval( ( SimpleNode ) rad.jjtGetChild( 0 ) ), "net.ozias.rad.lang" );
   }
 }
