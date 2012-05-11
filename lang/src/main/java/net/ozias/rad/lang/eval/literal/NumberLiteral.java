@@ -1,29 +1,32 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.literal;
 
-import net.ozias.rad.lang.ASTNegate;
+import net.ozias.rad.lang.ASTFloatingPointLiteral;
+import net.ozias.rad.lang.ASTIntegerLiteral;
+import net.ozias.rad.lang.ASTNumberLiteral;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 /**
- * Evaluate an ASTNegate node.
+ * Evaluate an ASTNumberLiteral node.
  */
-public final class Negate implements Evaluatable {
+public final class NumberLiteral implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static Negate instance = null;
+  private static NumberLiteral instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new Negate object.
+   * Creates a new NumberLiteral object.
    */
-  private Negate() {
+  private NumberLiteral() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -45,12 +48,12 @@ public final class Negate implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static Negate getInstance() {
+  public static NumberLiteral getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new Negate();
+        instance = new NumberLiteral();
       }
     }
 
@@ -61,20 +64,21 @@ public final class Negate implements Evaluatable {
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public Number evaluate( final SimpleNode node ) {
+    Number retnum = -1;
 
-    if ( node instanceof ASTNegate ) {
-      Number retnum = Primary.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+    if ( node instanceof ASTNumberLiteral ) {
+      final SimpleNode child = ( SimpleNode ) node.jjtGetChild( 0 );
 
-      if ( retnum instanceof Double ) {
-        retnum = ( Double ) retnum * -1.0d;
-      } else if ( retnum instanceof Integer ) {
-        retnum = ( Integer ) retnum * -1;
+      if ( child instanceof ASTIntegerLiteral ) {
+        retnum = ( Integer ) child.jjtGetValue();
+      } else if ( child instanceof ASTFloatingPointLiteral ) {
+        retnum = ( Double ) child.jjtGetValue();
       }
-
-      return retnum;
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTNegativePrimary node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTNumberLiteral node." );
     }
+
+    return retnum;
   }
 
 }

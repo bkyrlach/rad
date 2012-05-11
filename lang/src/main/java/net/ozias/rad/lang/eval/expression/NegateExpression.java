@@ -1,32 +1,30 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.expression;
 
-import net.ozias.rad.lang.ASTAssignmentFragment;
-import net.ozias.rad.lang.Invoker;
+import net.ozias.rad.lang.ASTNegateExpression;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 /**
- * Evaluates an ASTAssignmentFragment node.
+ * Evaluate an ASTNegate node.
  */
-public final class AssignmentFragment implements Evaluatable {
+public final class NegateExpression implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
-  /** Invoke parameter types. */
-  private static final Class<?>[] PARAMETER_TYPES = new Class<?>[] { String.class, String.class, Class.class, Object.class };
   /** Singleton Instance. */
-  private static AssignmentFragment instance = null;
+  private static NegateExpression instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new Expression object.
+   * Creates a new NegateExpression object.
    */
-  private AssignmentFragment() {
+  private NegateExpression() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -48,12 +46,12 @@ public final class AssignmentFragment implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static AssignmentFragment getInstance() {
+  public static NegateExpression getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new AssignmentFragment();
+        instance = new NegateExpression();
       }
     }
 
@@ -61,25 +59,23 @@ public final class AssignmentFragment implements Evaluatable {
   }
 
   /**
-   * Invoke addField on the current base with the given identifier and default value.
-   *
-   * @param  identifier  The identifier to add to the current base object.
-   * @param  value       The default value of the identifier.
-   */
-  public static void invoke( final String identifier, final Object value ) {
-    Invoker.invoke( Invoker.getCurrentBase(), "addField", PARAMETER_TYPES,
-      new Object[] { Invoker.getCurrentBase().replace( '.', '/' ), identifier, String.class, value.toString() } );
-  }
-
-  /**
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public Number evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTAssignmentFragment ) {
-      return Expression.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+    if ( node instanceof ASTNegateExpression ) {
+      Number retnum = Primary.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+
+      if ( retnum instanceof Double ) {
+        retnum = ( Double ) retnum * -1.0d;
+      } else if ( retnum instanceof Integer ) {
+        retnum = ( Integer ) retnum * -1;
+      }
+
+      return retnum;
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTAssignment node" );
+      throw new IllegalArgumentException( "Supplied node is not an ASTNegativePrimary node." );
     }
   }
+
 }

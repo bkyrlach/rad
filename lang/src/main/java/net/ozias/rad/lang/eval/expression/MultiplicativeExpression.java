@@ -1,35 +1,36 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.expression;
 
-import net.ozias.rad.lang.ASTExpression;
-import net.ozias.rad.lang.ASTTerm;
+import net.ozias.rad.lang.ASTMultiplicativeExpression;
+import net.ozias.rad.lang.ASTUnaryExpression;
 import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Evaluates an ASTExpression node.
+ * Evaluate an ASTMultiplicativeExpression node.
  */
-public final class Expression implements Evaluatable {
+public final class MultiplicativeExpression implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static Expression instance = null;
+  private static MultiplicativeExpression instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new Expression object.
+   * Creates a new MultiplicativeExpression object.
    */
-  private Expression() {
+  private MultiplicativeExpression() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -51,12 +52,12 @@ public final class Expression implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static Expression getInstance() {
+  public static MultiplicativeExpression getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new Expression();
+        instance = new MultiplicativeExpression();
       }
     }
 
@@ -68,40 +69,34 @@ public final class Expression implements Evaluatable {
    */
   @Override public Number evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTExpression ) {
-      Number retnum = -1;
+    if ( node instanceof ASTMultiplicativeExpression ) {
+      final Class<?>[] parameterTypes = new Class<?>[] { String.class, List.class };
+      final Object[] parameters = new Object[parameterTypes.length];
+      final int count = node.jjtGetNumChildren();
+      final LinkedList<Object> expression = new LinkedList<Object>();
 
-      if ( node != null ) {
-        final Class<?>[] parameterTypes = new Class<?>[] { String.class, List.class };
-        final Object[] parameters = new Object[parameterTypes.length];
-        final int count = node.jjtGetNumChildren();
-        final LinkedList<Object> expression = new LinkedList<Object>();
+      for ( int i = 0; i < count; i++ ) {
+        final SimpleNode childNode = ( SimpleNode ) node.jjtGetChild( i );
 
-        for ( int i = 0; i < count; i++ ) {
-          final SimpleNode childNode = ( SimpleNode ) node.jjtGetChild( i );
+        if ( childNode instanceof ASTUnaryExpression ) {
+          Number currentTerm = UnaryExpression.eval( childNode );
+          Object popped = expression.peek();
 
-          if ( childNode instanceof ASTTerm ) {
-            Number currentTerm = Term.eval( childNode );
-            Object popped = expression.peek();
-
-            if ( ( popped != null ) && ( popped instanceof String ) ) {
-              popped = expression.pop();
-              parameters[0] = ( String ) popped;
-              parameters[1] = populateNumbers( ( Number ) expression.pop(), currentTerm );
-              currentTerm = ( Number ) Invoker.invoke( "evalOp", parameterTypes, parameters );
-            }
-            expression.push( currentTerm );
-          } else {
-            expression.push( childNode.jjtGetValue() );
+          if ( ( popped != null ) && ( popped instanceof String ) ) {
+            popped = expression.pop();
+            parameters[0] = ( String ) popped;
+            parameters[1] = populateNumbers( ( Number ) expression.pop(), currentTerm );
+            currentTerm = ( Number ) Invoker.invoke( "evalOp", parameterTypes, parameters );
           }
+          expression.push( currentTerm );
+        } else {
+          expression.push( childNode.jjtGetValue() );
         }
-
-        retnum = ( Number ) expression.pop();
       }
 
-      return retnum;
+      return ( Number ) expression.pop();
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTExpression node" );
+      throw new IllegalArgumentException( "Supplied node is not an ASTMultiplicativeExpression node." );
     }
   }
 

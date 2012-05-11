@@ -1,29 +1,35 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.statement;
 
-import net.ozias.rad.lang.ASTUseStatement;
+import static net.ozias.rad.lang.asm.ASMConstants.BASE_ASM_CN;
+
+import net.ozias.rad.lang.ASTNamespaceStatement;
+import net.ozias.rad.lang.Invoker;
+import net.ozias.rad.lang.RadInvoker;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
+import net.ozias.rad.lang.eval.identifier.FullyQualifiedName;
 
 /**
- * Evaluate an ASTUseStatement node.
+ * Evaluate an ASTNamespaceStatement node.
  */
-public final class UseStatement implements Evaluatable {
+public final class NamespaceStatement implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static UseStatement instance = null;
+  private static NamespaceStatement instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new UseStatement object.
+   * Creates a new NamespaceStatement object.
    */
-  private UseStatement() {
+  private NamespaceStatement() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -45,12 +51,12 @@ public final class UseStatement implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static UseStatement getInstance() {
+  public static NamespaceStatement getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new UseStatement();
+        instance = new NamespaceStatement();
       }
     }
 
@@ -63,10 +69,20 @@ public final class UseStatement implements Evaluatable {
   @Override public String evaluate( final SimpleNode node ) {
     String retstr = null;
 
-    if ( node instanceof ASTUseStatement ) {
-      retstr = Name.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+    if ( node instanceof ASTNamespaceStatement ) {
+
+      if ( node.jjtGetNumChildren() == 1 ) {
+        final String namespace = FullyQualifiedName.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+        final String object = new StringBuilder( namespace ).append( ".Base" ).toString();
+        Invoker.addInvoker( object, new RadInvoker( object ) );
+        Invoker.setCurrentNamespace( namespace );
+        retstr = namespace;
+      } else {
+        retstr = ( String ) Invoker.invoke( "addField", new Class<?>[] { String.class, String.class, Class.class, Object.class },
+            new Object[] { BASE_ASM_CN, "currentNamespace", String.class, Invoker.getCurrentNamespace() } );
+      }
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTUse node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTNamespace node." );
     }
 
     return retstr;

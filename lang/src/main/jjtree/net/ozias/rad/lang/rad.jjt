@@ -21,12 +21,12 @@ public class Parser {
   
   public static SimpleNode parseFile( final InputStream stream ) throws FileNotFoundException, ParseException, TokenMgrError {
     final Parser parser = new Parser( stream );
-    parser.Rad();
+    parser.RadFile();
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
   
   public static SimpleNode parseFile( final File file ) throws FileNotFoundException, ParseException, TokenMgrError {    final Parser parser = new Parser( new FileReader( file ) );
-    parser.Rad();
+    parser.RadFile();
     return ( SimpleNode ) parser.jjtree.rootNode();
   }
 
@@ -65,7 +65,8 @@ SPECIAL_TOKEN : /* COMMENTS */
 }
 
 TOKEN : /* RESERVED WORDS AND LITERALS */{
-  < ACTIONS_RW: "actions" >
+  < ACTION_RW: "action" >
+| < ACTIONS_RW: "actions" >
 | < ADD_RW: "add" >
 | < BIT: "bit" >
 | < DATA: "data" >
@@ -79,15 +80,19 @@ TOKEN : /* RESERVED WORDS AND LITERALS */{
 | < FROM: "from" >
 | < HAS: "has" >
 | < INTEGER: "int" >| < IS: "is" >
+| < MANY: "many" >
 | < MOD: "mod" >
 | < MUL: "mul" >
 | < NAMESPACE: "namespace" >
 | < NS: "ns" >
+| < OBJ: "obj" >
+| < ONE: "one" >
 | < PERSIST: "persist" >
 | < READ: "read" >
 | < STRING: "str" >
 | < SUB: "sub" >
 | < USE: "use" >
+| < VIEW: "view" >
 | < WRITE: "write" >
 }
 
@@ -240,37 +245,77 @@ TOKEN: {
   ] >
 }
 
-/*****************************************
- * THE RAD LANGUAGE GRAMMAR STARTS HERE *
- *****************************************/
-void Rad() : {}
+/*****************************************************************************
+ * R@d Grammar                                                               *
+ *****************************************************************************/
+void RadFile() : {}
 {
-    [NamespaceStatement() ";"]
-    [(UseStatement() ";" )+]
-    (Block() ";" )+
+    (NamespaceStatement())?
+    ((UseStatement())+)?
     <EOF>
 }
 
+/*****************************************************************************
+ * R@d Identifier and Name Productions                                       *
+ *****************************************************************************/
+void Identifier() #Identifier :
+{ Token t; }
+{
+  t=< IDENTIFIER >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void IdentifierList() #IdentifierList :
+{}
+{
+  Identifier() ( < COMMA > Identifier() )*
+}
+
+void FullyQualifiedName() #FullyQualifiedName:
+{}
+{
+  Identifier() ( < DOT > Identifier() )*
+}
+
+void FullyQualifiedNameList() #FullyQualifiedNameList:
+{}
+{
+  FullyQualifiedName() ( < COMMA > FullyQualifiedName() )*
+}
+
+/*****************************************************************************
+ * R@d Statement Productions                                                 *
+ *****************************************************************************/
 void Statement() :
 {}
 {
-  NamespaceStatement()
+  LOOKAHEAD(2)
+  Expression()
+| NamespaceStatement()
 | UseStatement()
+| ObjectDeclarationStatement()
 | DataDeclarationStatement()
-| Expression()
-| Identifier() (AssignmentFragment() | LoadFragment())
+| HasDeclarationStatement()
+| ActionDeclarationStatement()
+| ActionStatement() 
 }
 
 void NamespaceStatement() :
 {}
-{  < NS > (Name())*
+{  < NS > (FullyQualifiedName())*
 |
-  < NAMESPACE > (Name())*
+  < NAMESPACE > (FullyQualifiedName())*
 }
 
 void UseStatement() :
 {}
-{ < USE > Name()
+{ < USE > FullyQualifiedName()
+}
+
+void ObjectDeclarationStatement() :
+{}
+{
+ < OBJ > Identifier() < IS > FullyQualifiedNameList()
 }
 
 void DataDeclarationStatement() :
@@ -278,193 +323,150 @@ void DataDeclarationStatement() :
 {
  (Filter())? DataType() Identifier() (< FROM > Identifier())?}
 
-void DataType() :
-{ Token t; }{
-  (
-    t=< STRING > ( < LPAREN > Integer() < RPAREN > )?
-  | t=< BIT > ( < LPAREN > Integer() < RPAREN > )?
-  | t=< INTEGER >
-  | t=< DECIMAL > ( < LPAREN > Integer() (< COMMA > Integer())? < RPAREN >)?
-  | t=< FLOAT >
-  | t=< DOUBLE >
-  )
-{ jjtThis.jjtSetValue( t.image ); }}
-
-void AssignmentFragment() :
+void HasDeclarationStatement() :
 {}
 {
-  < ASSIGN > ( Expression() | StringLiteral() )
-}
+  < HAS > (< MANY >|(< ONE >)?) FullyQualifiedName()}
 
-void LoadFragment() :
+void ActionDeclarationStatement() :
 {}
 {
-  < LOAD > ActionChain()
-}
-
-void ActionChain() :
-{}
-{
-  ActionStatement() ( < CHAIN > ActionStatement() )*
+  < ACTION_RW > Identifier()
 }
 
 void ActionStatement() :
 {}
 {
+  LOOKAHEAD(2)
+  NumberAction()
+| StringAction()
+}
+
+/*****************************************************************************
+ * R@d Action Productions                                                    *
+ *****************************************************************************/
+void NumberAction() :
+{}
+{
   < ACTION >
-  (
-    EchoAction()
-  | ReadAction()
-  | FetchAction()
-  | WriteAction()
-  | PersistAction()
-  | UserAction()
+  (    AddAction()
+  | SubtractAction()
   )
 }
 
-void EchoAction() :
-{ Token t; }
+void StringAction() :
+{}{
+  < ACTION >
+  (    EchoAction()
+  | ViewAction()
+  )}
+
+void AddAction() :
+{}
 {
-  t=< ECHO >
-  { jjtThis.jjtSetValue( t.image ); }
+  < ADD_RW > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >}
+
+void SubtractAction() :
+{}
+{
+  < SUB > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
+}
+
+void EchoAction() :
+{}
+{
+  < ECHO > ( FullyQualifiedName() | Literal() )
+}
+
+void ViewAction() :
+{}
+{
+  < VIEW > Identifier()
 }
 
 void ReadAction() :
-{ Token t; }
+{}
 {
-  t=< READ >
-  { jjtThis.jjtSetValue( t.image ); }}
+  < READ >}
 
 void FetchAction() :
-{ Token t; }
+{}
 {
-  t=< FETCH >
-  { jjtThis.jjtSetValue( t.image ); }
+  < FETCH >
 }
 
 void WriteAction() :
-{ Token t; }
+{}
 {
-  t=< WRITE >
-  { jjtThis.jjtSetValue( t.image ); }
+  < WRITE >
 }
 
 void PersistAction() :
-{ Token t; }
+{}
 {
-  t=< PERSIST >
-  { jjtThis.jjtSetValue( t.image ); }
+  < PERSIST >
 }
 
 void UserAction() :
-{ Token t; }
-{
-  t=< IDENTIFIER >
-  { jjtThis.jjtSetValue( t.image ); }
-}
-
-void Block() :
 {}
 {
-    (      Identifier() ["is" Identifier()("," Identifier() )*] "{"
-      [Has() ";"]
-      [Actions() ";"]
-      [Data() ";"]
-      "}"
-    )
+  < IDENTIFIER >
 }
 
-void Has() :
-{}
-{
-  "has" "{" "}"
-}
-
-void Actions() :
-{}
-{  "actions" "{" "}"
-}
-
-void Data() :
-{}
-{
-  "data" "{" "}"}
-
+/*****************************************************************************
+ * R@d Expression Productions (These evaluate to a number)                   *
+ *****************************************************************************/
 void Expression() :
 {}
 {
-  Term() ( Plus() Term() | Minus() Term() )*
+  MultiplicativeExpression() ( Plus() MultiplicativeExpression() | Minus() MultiplicativeExpression() )*
 }
 
-void Term() :
+void MultiplicativeExpression() :
 {}
 {
-  Primary() ( Mult() Primary() | Div() Primary() | Mod() Primary() )*
+  UnaryExpression() ( Multiply() UnaryExpression() | Divide() UnaryExpression() | Modulus() UnaryExpression() )*
+}
+
+void UnaryExpression() :
+{}
+{
+  NegateExpression()
+| PostfixExpression()
+}
+
+void NegateExpression() :
+{}
+{
+  Minus() Primary()}
+
+void PostfixExpression() :
+{}
+{
+  Primary() ( Increment() | Decrement() )?
 }
 
 void Primary() :
 {}
 {
-  (
-    Number()
-  | OpFunction()
-  | < LPAREN > Expression() < RPAREN >
-  | Negate()
-  )
+    NumberLiteral()
+  | NumberAction()
+  | < LPAREN > Expression() < RPAREN > 
 }
 
-void Number() #Number :
+/*****************************************************************************
+ * R@d Keyword Productions                                                   *
+ *****************************************************************************/
+void Filter() #Filter :
 { Token t; }
 {
-  Integer()
-|
-  FloatingPoint()
-}
-
-void Integer() #Integer :
-{ Token t; }{
-  t=< INTEGER_LITERAL > { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }}
-
-void FloatingPoint() #FloatingPoint :
-{ Token t; }
-{
-  t=< FLOATING_POINT_LITERAL > { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
-}
-
-void StringLiteral() #StringLiteral :
-{ Token t; }
-{
-  t=< STRING_LITERAL >
-  { jjtThis.jjtSetValue( t.image );}}
-
-void OpFunction() :
-{ Token t; }
-{
-  (
-  t="add" < LPAREN > Primary() ("," Primary())+ < RPAREN >
-  |
-  t="sub" < LPAREN > Primary() ("," Primary())+ < RPAREN >
-  |
-  t="mul" < LPAREN > Primary() ("," Primary())+ < RPAREN >
-  |
-  t="div" < LPAREN > Primary() ("," Primary())+ < RPAREN >
-  |
-  t="mod" < LPAREN > Primary() ("," Primary())+ < RPAREN > 
-  )
+  t=< FILTER >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Negate()  :
-{}
-{
-  < MINUS > Primary()}
-
-void Name() :
-{}
-{
-  Identifier() ( LOOKAHEAD(2) "." Identifier() )*
-}
-
+/*****************************************************************************
+ * R@d Operator Productions                                                  *
+ *****************************************************************************/
 void Action() #Action :
 { Token t; }{
   t=< ACTION >
@@ -477,11 +479,34 @@ void Assign() #Assign :
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Plus() #Plus :
+void Chain() #Chain :
 { Token t; }
-{  t=< PLUS >
+{
+  t=< CHAIN >
   { jjtThis.jjtSetValue( t.image ); }
 }
+
+void Decrement() #Decrement :
+{ Token t; }
+{
+  t=< DECREMENT >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Divide() #Divide :
+{ Token t; }
+{
+  t=< DIVIDE >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
+void Increment() #Increment :
+{ Token t; }
+{
+  t=< INCREMENT >
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
 void Minus() #Minus :
 { Token t; }
 {
@@ -489,37 +514,99 @@ void Minus() #Minus :
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Mult() #Mult :
+void Multiply() #Multiply :
 { Token t; }
 {
   t=< MULTIPLY >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Div() #Div :
-{ Token t; }
-{
-  t=< DIVIDE >
-  { jjtThis.jjtSetValue( t.image ); }
-}
-
-void Mod() #Mod :
+void Modulus() #Modulus :
 { Token t; }
 {
   t=< MODULUS >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Identifier() #Identifier :
+void Plus() #Plus :
 { Token t; }
 {
-  t=< IDENTIFIER >
+  t=< PLUS >
   { jjtThis.jjtSetValue( t.image ); }
 }
 
-void Filter() #Filter :
+/*****************************************************************************
+ * R@d Literal Productions                                                   *
+ *****************************************************************************/
+void Literal() #Literal :
+{}
+{
+  NumberLiteral()
+| StringLiteral()}
+
+void NumberLiteral() #NumberLiteral :
+{}
+{
+  IntegerLiteral()
+| FloatingPointLiteral()
+}
+
+void IntegerLiteral() #IntegerLiteral :
 { Token t; }
 {
-  t=< FILTER >
-  { jjtThis.jjtSetValue( t.image ); }
+  t=< INTEGER_LITERAL >
+  { jjtThis.jjtSetValue( Integer.parseInt( t.image ) ); }
+}
+
+void FloatingPointLiteral() #FloatingPointLiteral :
+{ Token t; }
+{
+  t=< FLOATING_POINT_LITERAL >
+  { jjtThis.jjtSetValue( Double.parseDouble( t.image ) ); }
+}
+
+void StringLiteral() #StringLiteral :
+{ Token t; }
+{
+  t=< STRING_LITERAL >
+  { jjtThis.jjtSetValue( t.image );}
+}
+
+/*****************************************************************************
+ * R@d DataType Production                                                   *
+ *****************************************************************************/
+void DataType() #DataType:
+{}
+{
+  StringDataType()
+| IntegerDataType()
+| DoubleDataType()
+| BitDataType()
+| DecimalDataType()
+}
+
+void StringDataType() #StringDataType :
+{}{
+  < STRING > ( < LPAREN > IntegerLiteral() < RPAREN > )?}
+
+void BitDataType() #BitDataType :
+{}
+{
+  < BIT > ( < LPAREN > IntegerLiteral() < RPAREN > )?
+}
+
+void DecimalDataType() #DecimalDataType :
+{}
+{
+  < DECIMAL > ( < LPAREN > IntegerLiteral() (< COMMA > IntegerLiteral())? < RPAREN >)?
+}
+
+void IntegerDataType() #IntegerDataType :
+{}{
+  < INTEGER >}
+
+void DoubleDataType() #DoubleDataType :
+{}
+{
+  < DOUBLE >
 }

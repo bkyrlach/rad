@@ -1,11 +1,12 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.datatype;
 
 import net.ozias.rad.lang.ASTDataType;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.datatype.RadString;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 /**
  * Evaluate an ASTDataType node.

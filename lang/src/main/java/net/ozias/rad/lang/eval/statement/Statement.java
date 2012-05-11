@@ -1,17 +1,17 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.statement;
 
-import net.ozias.rad.lang.ASTAssignmentFragment;
+import net.ozias.rad.lang.ASTActionStatement;
 import net.ozias.rad.lang.ASTDataDeclarationStatement;
 import net.ozias.rad.lang.ASTExpression;
-import net.ozias.rad.lang.ASTIdentifier;
-import net.ozias.rad.lang.ASTLoadFragment;
 import net.ozias.rad.lang.ASTNamespaceStatement;
 import net.ozias.rad.lang.ASTStatement;
 import net.ozias.rad.lang.ASTUseStatement;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
+import net.ozias.rad.lang.eval.expression.Expression;
 
 /**
  * Evaluate an ASTStatement node.
@@ -90,7 +90,6 @@ public final class Statement implements Evaluatable {
    */
   private String evaluateASTStatementNode( final SimpleNode node ) {
     String retstr = "";
-    final int count = node.jjtGetNumChildren();
     final SimpleNode child = ( SimpleNode ) node.jjtGetChild( 0 );
 
     if ( child instanceof ASTNamespaceStatement ) {
@@ -99,24 +98,10 @@ public final class Statement implements Evaluatable {
       retstr = UseStatement.eval( child );
     } else if ( child instanceof ASTDataDeclarationStatement ) {
       retstr = DataDeclarationStatement.eval( child );
+    } else if ( child instanceof ASTActionStatement ) {
+      retstr = ActionStatement.eval( child ).toString();
     } else if ( child instanceof ASTExpression ) {
       retstr = Expression.eval( child ).toString();
-    } else if ( child instanceof ASTIdentifier ) {
-      final String identifier = ( String ) child.jjtGetValue();
-
-      if ( count == 1 ) {
-        retstr = "Identifier encountered.";
-      } else if ( count == 2 ) {
-        final SimpleNode next = ( SimpleNode ) node.jjtGetChild( 1 );
-
-        if ( next instanceof ASTAssignmentFragment ) {
-          final Number value = AssignmentFragment.eval( next );
-          AssignmentFragment.invoke( identifier, value );
-          retstr = "Assignment successful.";
-        } else if ( next instanceof ASTLoadFragment ) {
-          retstr = "Load encountered.";
-        }
-      }
     }
 
     return retstr;

@@ -1,29 +1,32 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.action;
 
-import net.ozias.rad.lang.ASTName;
+import net.ozias.rad.lang.ASTAddAction;
+import net.ozias.rad.lang.ASTNumberAction;
+import net.ozias.rad.lang.ASTSubtractAction;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 /**
- * Evaluate an ASTName node.
+ * Evaluate an ASTNumberAction node.
  */
-public final class Name implements Evaluatable {
+public final class NumberAction implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static Name instance = null;
+  private static NumberAction instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new Name object.
+   * Creates a new NumberAction object.
    */
-  private Name() {
+  private NumberAction() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -36,7 +39,7 @@ public final class Name implements Evaluatable {
    *
    * @return  The String result from evaluating the node.
    */
-  public static String eval( final SimpleNode node ) {
+  public static Number eval( final SimpleNode node ) {
     return getInstance().evaluate( node );
   }
 
@@ -45,12 +48,12 @@ public final class Name implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static Name getInstance() {
+  public static NumberAction getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new Name();
+        instance = new NumberAction();
       }
     }
 
@@ -60,24 +63,22 @@ public final class Name implements Evaluatable {
   /**
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
-  @Override public String evaluate( final SimpleNode node ) {
+  @Override public Number evaluate( final SimpleNode node ) {
+    Number retnum = -1;
 
-    if ( node instanceof ASTName ) {
-      final StringBuilder sb = new StringBuilder();
-      final int count = node.jjtGetNumChildren();
+    if ( node instanceof ASTNumberAction ) {
+      final SimpleNode opAction = ( SimpleNode ) node.jjtGetChild( 0 );
 
-      for ( int i = 0; i < count; i++ ) {
-        sb.append( ( ( SimpleNode ) node.jjtGetChild( i ) ).jjtGetValue() );
-
-        if ( i < ( count - 1 ) ) {
-          sb.append( "." );
-        }
+      if ( opAction instanceof ASTAddAction ) {
+        retnum = AddAction.eval( opAction );
+      } else if ( opAction instanceof ASTSubtractAction ) {
+        retnum = SubtractAction.eval( opAction );
       }
-
-      return sb.toString();
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTName node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTEchoAction node." );
     }
+
+    return retnum;
   }
 
 }

@@ -1,29 +1,31 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.statement;
 
-import net.ozias.rad.lang.ASTNumber;
+import net.ozias.rad.lang.ASTUseStatement;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
+import net.ozias.rad.lang.eval.identifier.FullyQualifiedName;
 
 /**
- * Evaluate an ASTNumber node.
+ * Evaluate an ASTUseStatement node.
  */
-public final class RadNumber implements Evaluatable {
+public final class UseStatement implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static RadNumber instance = null;
+  private static UseStatement instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new RadNumber object.
+   * Creates a new UseStatement object.
    */
-  private RadNumber() {
+  private UseStatement() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -34,9 +36,9 @@ public final class RadNumber implements Evaluatable {
    *
    * @param   node  The node to evaluate.
    *
-   * @return  The Number result from evaluating the node.
+   * @return  The String result from evaluating the node.
    */
-  public static Number eval( final SimpleNode node ) {
+  public static String eval( final SimpleNode node ) {
     return getInstance().evaluate( node );
   }
 
@@ -45,12 +47,12 @@ public final class RadNumber implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static RadNumber getInstance() {
+  public static UseStatement getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new RadNumber();
+        instance = new UseStatement();
       }
     }
 
@@ -60,13 +62,16 @@ public final class RadNumber implements Evaluatable {
   /**
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
-  @Override public Number evaluate( final SimpleNode node ) {
+  @Override public String evaluate( final SimpleNode node ) {
+    String retstr = null;
 
-    if ( node instanceof ASTNumber ) {
-      return ( Number ) ( ( SimpleNode ) node.jjtGetChild( 0 ) ).jjtGetValue();
+    if ( node instanceof ASTUseStatement ) {
+      retstr = FullyQualifiedName.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTNumber node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTUse node." );
     }
+
+    return retstr;
   }
 
 }

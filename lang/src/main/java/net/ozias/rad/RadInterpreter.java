@@ -6,7 +6,7 @@ package net.ozias.rad;
 import jline.console.ConsoleReader;
 
 import net.ozias.rad.lang.Parser;
-import net.ozias.rad.lang.eval.Statement;
+import net.ozias.rad.lang.eval.statement.Statement;
 
 import org.apache.log4j.Logger;
 

@@ -1,33 +1,30 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.identifier;
 
-import net.ozias.rad.lang.ASTOpFunction;
-import net.ozias.rad.lang.Invoker;
+import net.ozias.rad.lang.ASTFullyQualifiedName;
 import net.ozias.rad.lang.SimpleNode;
-
-import java.util.ArrayList;
-import java.util.List;
+import net.ozias.rad.lang.eval.Evaluatable;
 
 /**
- * Evaluate an ASTOpFunction node.
+ * Evaluate an ASTFullyQualifiedName node.
  */
-public final class OpFunction implements Evaluatable {
+public final class FullyQualifiedName implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static OpFunction instance = null;
+  private static FullyQualifiedName instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new OpFunction object.
+   * Creates a new FullyQualifiedName object.
    */
-  private OpFunction() {
+  private FullyQualifiedName() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -38,9 +35,9 @@ public final class OpFunction implements Evaluatable {
    *
    * @param   node  The node to evaluate.
    *
-   * @return  The Number result from evaluating the node.
+   * @return  The String result from evaluating the node.
    */
-  public static Number eval( final SimpleNode node ) {
+  public static String eval( final SimpleNode node ) {
     return getInstance().evaluate( node );
   }
 
@@ -49,12 +46,12 @@ public final class OpFunction implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static OpFunction getInstance() {
+  public static FullyQualifiedName getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new OpFunction();
+        instance = new FullyQualifiedName();
       }
     }
 
@@ -64,25 +61,23 @@ public final class OpFunction implements Evaluatable {
   /**
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
-  @Override public Number evaluate( final SimpleNode node ) {
+  @Override public String evaluate( final SimpleNode node ) {
 
-    if ( node instanceof ASTOpFunction ) {
-      Number retnum = -1;
+    if ( node instanceof ASTFullyQualifiedName ) {
+      final StringBuilder sb = new StringBuilder();
+      final int count = node.jjtGetNumChildren();
 
-      if ( node != null ) {
-        final String op = ( String ) node.jjtGetValue();
-        final List<Number> numbers = new ArrayList<Number>();
+      for ( int i = 0; i < count; i++ ) {
+        sb.append( ( ( SimpleNode ) node.jjtGetChild( i ) ).jjtGetValue() );
 
-        for ( int i = 0; i < node.jjtGetNumChildren(); i++ ) {
-          numbers.add( Primary.eval( ( SimpleNode ) node.jjtGetChild( i ) ) );
+        if ( i < ( count - 1 ) ) {
+          sb.append( "." );
         }
-
-        retnum = ( Number ) Invoker.invoke( "evalOp", new Class<?>[] { String.class, List.class }, new Object[] { op, numbers } );
       }
 
-      return retnum;
+      return sb.toString();
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTOpFunction node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTFullyQualifiedName node." );
     }
   }
 

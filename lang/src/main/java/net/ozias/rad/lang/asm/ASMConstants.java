@@ -12,9 +12,9 @@ public final class ASMConstants {
 
   /** Default base object namespace. */
   public static final String BASE_NS = "net.ozias.rad.lang";
-  /** Name of the base class for use with class loaders. */
+  /** FullyQualifiedName of the base class for use with class loaders. */
   public static final String BASE_CN = BASE_NS + ".Base";
-  /** Name of the base class for use with ASM. */
+  /** FullyQualifiedName of the base class for use with ASM. */
   public static final String BASE_ASM_CN = BASE_CN.replace( '.', '/' );
   /** Object Identifier. */
   private static final String OBJ = "L";

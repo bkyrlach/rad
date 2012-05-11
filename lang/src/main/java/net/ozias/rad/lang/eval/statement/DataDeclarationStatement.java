@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval;
+package net.ozias.rad.lang.eval.statement;
 
 import net.ozias.rad.lang.ASTDataDeclarationStatement;
 import net.ozias.rad.lang.ASTDataType;
@@ -9,6 +9,8 @@ import net.ozias.rad.lang.ASTFilter;
 import net.ozias.rad.lang.ASTIdentifier;
 import net.ozias.rad.lang.Invoker;
 import net.ozias.rad.lang.SimpleNode;
+import net.ozias.rad.lang.eval.Evaluatable;
+import net.ozias.rad.lang.eval.datatype.DataType;
 
 /**
  * Evaluate an ASTDataDeclarationStatement node.
