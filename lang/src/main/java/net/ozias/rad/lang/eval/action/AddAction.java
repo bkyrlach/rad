@@ -71,7 +71,14 @@ public final class AddAction implements Evaluatable {
       for ( int i = 0; i < count; i++ ) {
         final Number currentValue = Expression.eval( ( SimpleNode ) node.jjtGetChild( i ) );
 
-        if ( ( retnum instanceof Integer ) && ( currentValue instanceof Integer ) ) {
+        if ( i == 0 ) {
+
+          if ( currentValue instanceof Integer ) {
+            retnum = currentValue.intValue();
+          } else {
+            retnum = currentValue.doubleValue();
+          }
+        } else if ( ( retnum instanceof Integer ) && ( currentValue instanceof Integer ) ) {
           retnum = retnum.intValue() + currentValue.intValue();
         } else {
           retnum = retnum.doubleValue() + currentValue.doubleValue();

@@ -351,6 +351,9 @@ void NumberAction() :
   < ACTION >
   (    AddAction()
   | SubtractAction()
+  | MultiplyAction()
+  | DivideAction()
+  | ModulusAction()
   )
 }
 
@@ -370,6 +373,24 @@ void SubtractAction() :
 {}
 {
   < SUB > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
+}
+
+void MultiplyAction() :
+{}
+{
+  < MUL > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
+}
+
+void DivideAction() :
+{}
+{
+  < DIV > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
+}
+
+void ModulusAction() :
+{}
+{
+  < MOD > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
 }
 
 void EchoAction() :
