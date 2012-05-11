@@ -9,7 +9,7 @@ import net.ozias.rad.lang.ASTNumberLiteral;
 import net.ozias.rad.lang.ASTPrimary;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.eval.Evaluatable;
-import net.ozias.rad.lang.eval.action.NumberAction;
+import net.ozias.rad.lang.eval.action.number.NumberAction;
 import net.ozias.rad.lang.eval.literal.NumberLiteral;
 
 /**

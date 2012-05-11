@@ -1,31 +1,31 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval.action;
+package net.ozias.rad.lang.eval.action.number;
 
-import net.ozias.rad.lang.ASTMultiplyAction;
+import net.ozias.rad.lang.ASTSubtractAction;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.eval.Evaluatable;
 import net.ozias.rad.lang.eval.expression.Expression;
 
 /**
- * Evaluate an ASTMultiplyAction node.
+ * Evaluate an ASTSubtractAction node.
  */
-public final class MultiplyAction implements Evaluatable {
+public final class SubtractAction implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static MultiplyAction instance = null;
+  private static SubtractAction instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new MultiplyAction object.
+   * Creates a new SubtractAction object.
    */
-  private MultiplyAction() {
+  private SubtractAction() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -47,12 +47,12 @@ public final class MultiplyAction implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static MultiplyAction getInstance() {
+  public static SubtractAction getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new MultiplyAction();
+        instance = new SubtractAction();
       }
     }
 
@@ -63,9 +63,9 @@ public final class MultiplyAction implements Evaluatable {
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public Number evaluate( final SimpleNode node ) {
-    Number retnum = 1;
+    Number retnum = 0;
 
-    if ( node instanceof ASTMultiplyAction ) {
+    if ( node instanceof ASTSubtractAction ) {
       final int count = node.jjtGetNumChildren();
 
       for ( int i = 0; i < count; i++ ) {
@@ -79,13 +79,13 @@ public final class MultiplyAction implements Evaluatable {
             retnum = currentValue.doubleValue();
           }
         } else if ( ( retnum instanceof Integer ) && ( currentValue instanceof Integer ) ) {
-          retnum = retnum.intValue() * currentValue.intValue();
+          retnum = retnum.intValue() - currentValue.intValue();
         } else {
-          retnum = retnum.doubleValue() * currentValue.doubleValue();
+          retnum = retnum.doubleValue() - currentValue.doubleValue();
         }
       }
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTMultiplyAction node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTSubtractAction node." );
     }
 
     return retnum;

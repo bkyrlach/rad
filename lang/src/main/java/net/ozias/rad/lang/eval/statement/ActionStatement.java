@@ -9,9 +9,9 @@ import net.ozias.rad.lang.ASTNumberAction;
 import net.ozias.rad.lang.ASTViewAction;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.eval.Evaluatable;
-import net.ozias.rad.lang.eval.action.EchoAction;
-import net.ozias.rad.lang.eval.action.NumberAction;
-import net.ozias.rad.lang.eval.action.ViewAction;
+import net.ozias.rad.lang.eval.action.number.NumberAction;
+import net.ozias.rad.lang.eval.action.string.EchoAction;
+import net.ozias.rad.lang.eval.action.string.ViewAction;
 
 /**
  * Evaluate an ASTActionStatement node.

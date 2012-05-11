@@ -79,6 +79,7 @@ TOKEN : /* RESERVED WORDS AND LITERALS */{
 | < FILTER: "filter" >
 | < FROM: "from" >
 | < HAS: "has" >
+| < HELP: "help" >
 | < INTEGER: "int" >| < IS: "is" >
 | < MANY: "many" >
 | < MOD: "mod" >
@@ -248,7 +249,8 @@ TOKEN: {
 /*****************************************************************************
  * R@d Grammar                                                               *
  *****************************************************************************/
-void RadFile() : {}
+void RadFile() :
+{}
 {
     (NamespaceStatement())?
     ((UseStatement())+)?
@@ -315,7 +317,7 @@ void UseStatement() :
 void ObjectDeclarationStatement() :
 {}
 {
- < OBJ > Identifier() < IS > FullyQualifiedNameList()
+ < OBJ > Identifier() (< IS > FullyQualifiedNameList())*
 }
 
 void DataDeclarationStatement() :
@@ -357,17 +359,11 @@ void NumberAction() :
   )
 }
 
-void StringAction() :
-{}{
-  < ACTION >
-  (    EchoAction()
-  | ViewAction()
-  )}
-
 void AddAction() :
 {}
 {
-  < ADD_RW > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >}
+  < ADD_RW > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
+}
 
 void SubtractAction() :
 {}
@@ -393,6 +389,18 @@ void ModulusAction() :
   < MOD > < LPAREN > Expression() ( < COMMA > Expression() )+ < RPAREN >
 }
 
+void StringAction() :
+{}{
+  < ACTION >
+  (
+    HelpAction()  | EchoAction()
+  | ViewAction()
+  )}
+
+void HelpAction() :
+{}
+{
+  < HELP > ( Identifier() )?} 
 void EchoAction() :
 {}
 {

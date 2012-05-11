@@ -64,7 +64,7 @@ public final class NegateExpression implements Evaluatable {
   @Override public Number evaluate( final SimpleNode node ) {
 
     if ( node instanceof ASTNegateExpression ) {
-      Number retnum = Primary.eval( ( SimpleNode ) node.jjtGetChild( 0 ) );
+      Number retnum = Primary.eval( ( SimpleNode ) node.jjtGetChild( 1 ) );
 
       if ( retnum instanceof Double ) {
         retnum = ( Double ) retnum * -1.0d;

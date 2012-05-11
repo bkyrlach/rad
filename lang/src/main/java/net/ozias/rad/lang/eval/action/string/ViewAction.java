@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval.action;
+package net.ozias.rad.lang.eval.action.string;
 
 import net.ozias.rad.lang.ASTViewAction;
 import net.ozias.rad.lang.Invoker;

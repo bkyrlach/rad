@@ -1,31 +1,35 @@
 /**
  * Copyright (c) 2011 Oziasnet, LLC. All Rights Reserved.
  */
-package net.ozias.rad.lang.eval.action;
+package net.ozias.rad.lang.eval.action.number;
 
+import net.ozias.rad.lang.ASTAddAction;
 import net.ozias.rad.lang.ASTDivideAction;
+import net.ozias.rad.lang.ASTModulusAction;
+import net.ozias.rad.lang.ASTMultiplyAction;
+import net.ozias.rad.lang.ASTNumberAction;
+import net.ozias.rad.lang.ASTSubtractAction;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.eval.Evaluatable;
-import net.ozias.rad.lang.eval.expression.Expression;
 
 /**
- * Evaluate an ASTDivideAction node.
+ * Evaluate an ASTNumberAction node.
  */
-public final class DivideAction implements Evaluatable {
+public final class NumberAction implements Evaluatable {
 
   //~ Static fields/initializers -------------------------------------------------------------------------------------------------------------------------------
 
   /** Singleton Instance. */
-  private static DivideAction instance = null;
+  private static NumberAction instance = null;
   /** Lock object. */
   private static final Object LOCK = new Object();
 
   //~ Constructors ---------------------------------------------------------------------------------------------------------------------------------------------
 
   /**
-   * Creates a new DivideAction object.
+   * Creates a new NumberAction object.
    */
-  private DivideAction() {
+  private NumberAction() {
     // Ensures this cannot be instantiated through normal means.
   }
 
@@ -47,12 +51,12 @@ public final class DivideAction implements Evaluatable {
    *
    * @return  The singleton instance.
    */
-  public static DivideAction getInstance() {
+  public static NumberAction getInstance() {
 
     synchronized ( LOCK ) {
 
       if ( instance == null ) {
-        instance = new DivideAction();
+        instance = new NumberAction();
       }
     }
 
@@ -63,29 +67,24 @@ public final class DivideAction implements Evaluatable {
    * @see  net.ozias.rad.lang.eval.Evaluatable#evaluate(net.ozias.rad.lang.SimpleNode)
    */
   @Override public Number evaluate( final SimpleNode node ) {
-    Number retnum = 1;
+    Number retnum = -1;
 
-    if ( node instanceof ASTDivideAction ) {
-      final int count = node.jjtGetNumChildren();
+    if ( node instanceof ASTNumberAction ) {
+      final SimpleNode opAction = ( SimpleNode ) node.jjtGetChild( 0 );
 
-      for ( int i = 0; i < count; i++ ) {
-        final Number currentValue = Expression.eval( ( SimpleNode ) node.jjtGetChild( i ) );
-
-        if ( i == 0 ) {
-
-          if ( currentValue instanceof Integer ) {
-            retnum = currentValue.intValue();
-          } else {
-            retnum = currentValue.doubleValue();
-          }
-        } else if ( ( retnum instanceof Integer ) && ( currentValue instanceof Integer ) ) {
-          retnum = retnum.intValue() / currentValue.intValue();
-        } else {
-          retnum = retnum.doubleValue() / currentValue.doubleValue();
-        }
+      if ( opAction instanceof ASTAddAction ) {
+        retnum = AddAction.eval( opAction );
+      } else if ( opAction instanceof ASTSubtractAction ) {
+        retnum = SubtractAction.eval( opAction );
+      } else if ( opAction instanceof ASTMultiplyAction ) {
+        retnum = MultiplyAction.eval( opAction );
+      } else if ( opAction instanceof ASTDivideAction ) {
+        retnum = DivideAction.eval( opAction );
+      } else if ( opAction instanceof ASTModulusAction ) {
+        retnum = ModulusAction.eval( opAction );
       }
     } else {
-      throw new IllegalArgumentException( "Supplied node is not an ASTAddAction node." );
+      throw new IllegalArgumentException( "Supplied node is not an ASTEchoAction node." );
     }
 
     return retnum;
