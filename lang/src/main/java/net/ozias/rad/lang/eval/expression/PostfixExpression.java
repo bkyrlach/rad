@@ -72,9 +72,9 @@ public final class PostfixExpression implements Evaluatable {
         final SimpleNode operator = ( SimpleNode ) node.jjtGetChild( 1 );
 
         if ( operator instanceof ASTIncrement ) {
-          retnum = increment( retnum );
+          retnum = retnum.intValue() + 1;
         } else if ( operator instanceof ASTDecrement ) {
-          retnum = decrement( retnum );
+          retnum = retnum.intValue() - 1;
         }
       }
 
@@ -83,31 +83,4 @@ public final class PostfixExpression implements Evaluatable {
       throw new IllegalArgumentException( "Supplied node is not an ASTPostfixExpression node." );
     }
   }
-
-  /**
-   * Decrement the given number.
-   *
-   * @param   number  The number to decrement.
-   *
-   * @return  The number minus 1.
-   */
-  private Number decrement( final Number number ) {
-    int value = number.intValue();
-
-    return value--;
-  }
-
-  /**
-   * Increment the given number.
-   *
-   * @param   number  The number to increment.
-   *
-   * @return  The number plus 1.
-   */
-  private Number increment( final Number number ) {
-    int value = number.intValue();
-
-    return value++;
-  }
-
 }
