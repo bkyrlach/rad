@@ -42,15 +42,15 @@ public class RadInterpreter implements Runnable {
 
         if ( token.isEmpty() ) {
           con.println( "Empty token." );
-        } else if ( token.equalsIgnoreCase( "exit" ) ) {
-          con.println( "Exiting.  This may take a few moments while everything cleans up." );
-
-          break;
         } else {
           final String eval = Statement.eval( Parser.parseStatement( token ) );
 
           if ( eval == null ) {
             con.println( "Unable to evaluate the statement." );
+          } else if ( "exit".equalsIgnoreCase( eval ) ) {
+            con.println( "Exiting.  This may take a few moments while everything cleans up." );
+
+            break;
           } else {
             con.println( eval );
           }

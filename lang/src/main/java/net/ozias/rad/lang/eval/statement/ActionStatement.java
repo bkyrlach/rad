@@ -4,14 +4,12 @@
 package net.ozias.rad.lang.eval.statement;
 
 import net.ozias.rad.lang.ASTActionStatement;
-import net.ozias.rad.lang.ASTEchoAction;
 import net.ozias.rad.lang.ASTNumberAction;
-import net.ozias.rad.lang.ASTViewAction;
+import net.ozias.rad.lang.ASTStringAction;
 import net.ozias.rad.lang.SimpleNode;
 import net.ozias.rad.lang.eval.Evaluatable;
 import net.ozias.rad.lang.eval.action.number.NumberAction;
-import net.ozias.rad.lang.eval.action.string.EchoAction;
-import net.ozias.rad.lang.eval.action.string.ViewAction;
+import net.ozias.rad.lang.eval.action.string.StringAction;
 
 /**
  * Evaluate an ASTActionStatement node.
@@ -89,10 +87,8 @@ public final class ActionStatement implements Evaluatable {
   private Object evaluateActionStatement( final SimpleNode node ) {
     Object retobj = null;
 
-    if ( node instanceof ASTEchoAction ) {
-      retobj = EchoAction.eval( node );
-    } else if ( node instanceof ASTViewAction ) {
-      retobj = ViewAction.eval( node );
+    if ( node instanceof ASTStringAction ) {
+      retobj = StringAction.eval( node );
     } else if ( node instanceof ASTNumberAction ) {
       retobj = NumberAction.eval( node );
     } else {

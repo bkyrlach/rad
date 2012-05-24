@@ -74,13 +74,14 @@ TOKEN : /* RESERVED WORDS AND LITERALS */{
 | < DIV: "div" >
 | < DOUBLE: "double" >
 | < ECHO: "echo" >
+| < EXIT: "exit" >
 | < FETCH: "fetch" >
 | < FLOAT: "float" >
 | < FILTER: "filter" >
 | < FROM: "from" >
 | < HAS: "has" >
-| < HELP: "help" >
 | < INTEGER: "int" >| < IS: "is" >
+| < MAN: "man" >
 | < MANY: "many" >
 | < MOD: "mod" >
 | < MUL: "mul" >
@@ -260,6 +261,45 @@ void RadFile() :
 /*****************************************************************************
  * R@d Identifier and Name Productions                                       *
  *****************************************************************************/
+void ReservedWord() #ReservedWord :
+{ Token t; }
+{
+  (  t=< ACTION_RW >
+| t=< ACTIONS_RW >
+| t=< ADD_RW >
+| t=< BIT >
+| t=< DATA >
+| t=< DECIMAL >
+| t=< DIV >
+| t=< DOUBLE >
+| t=< ECHO >
+| t=< EXIT >
+| t=< FETCH >
+| t=< FLOAT >
+| t=< FILTER >
+| t=< FROM >
+| t=< HAS >
+| t=< INTEGER >
+| t=< IS >
+| t=< MAN >
+| t=< MANY >
+| t=< MOD >
+| t=< MUL >
+| t=< NAMESPACE >
+| t=< NS >
+| t=< OBJ >
+| t=< ONE >
+| t=< PERSIST >
+| t=< READ >
+| t=< STRING >
+| t=< SUB >
+| t=< USE >
+| t=< VIEW >
+| t=< WRITE >
+)
+  { jjtThis.jjtSetValue( t.image ); }
+}
+
 void Identifier() #Identifier :
 { Token t; }
 {
@@ -339,9 +379,9 @@ void ActionDeclarationStatement() :
 void ActionStatement() :
 {}
 {
-  LOOKAHEAD(2)
+  < ACTION > (
   NumberAction()
-| StringAction()
+| StringAction())
 }
 
 /*****************************************************************************
@@ -350,7 +390,6 @@ void ActionStatement() :
 void NumberAction() :
 {}
 {
-  < ACTION >
   (    AddAction()
   | SubtractAction()
   | MultiplyAction()
@@ -391,16 +430,16 @@ void ModulusAction() :
 
 void StringAction() :
 {}{
-  < ACTION >
   (
-    HelpAction()  | EchoAction()
+    ManualAction()  | EchoAction()
   | ViewAction()
+  | ExitAction()
   )}
 
-void HelpAction() :
+void ManualAction() :
 {}
 {
-  < HELP > ( Identifier() )?} 
+  < MAN > ( ReservedWord() | Identifier() )+} 
 void EchoAction() :
 {}
 {
@@ -411,6 +450,13 @@ void ViewAction() :
 {}
 {
   < VIEW > Identifier()
+}
+
+void ExitAction() :
+{ Token t; }
+{
+  t=< EXIT >
+  { jjtThis.jjtSetValue( t.image ); }
 }
 
 void ReadAction() :
@@ -479,7 +525,7 @@ void Primary() :
 {}
 {
     NumberLiteral()
-  | NumberAction()
+  | < ACTION > NumberAction()
   | < LPAREN > Expression() < RPAREN > 
 }
 
